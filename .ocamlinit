@@ -1,5 +1,7 @@
 #directory "_build";;
 #require "ounit2";;
+#require "graphics";;
 #require "ANSITerminal";;
 #load "board.cmo";;
 #load "state.cmo";;
+#load "graphics.cma";;
