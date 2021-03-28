@@ -1,0 +1,6 @@
+"Resource: /Users/ethan/3110/cs3110-final-project/board.ml": "\171!P\003\023\173\180GO\225\155\001E\208>\153"
+"Rule: ocaml: ml & cmi -> cmo (%=board )": "\206\165\198[\246\173b\245\181\171\134'\219\203\142\003"
+"Rule: ocaml dependencies mli (%=board )": "\249_\011[\214\001\194h2\187\191\215\229dE\191"
+"Resource: /Users/ethan/3110/cs3110-final-project/board.mli": "\138\196\161b8i\152\174\172z\128\238\171\193\191\135"
+"Rule: ocaml: mli -> cmi (%=board )": "\2037~u\028\1427\201\199y|t\001\156\1756"
+"Rule: ocaml dependencies ml (%=board )": "\191\238\133=\169\170U\1882\140\187\129\251\192c\223"

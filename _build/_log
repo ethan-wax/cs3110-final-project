@@ -1,0 +1,10 @@
+### Starting build.
+# Target: board.mli.depends, tags: { package(ANSITerminal), package(ounit2), extension:mli, file:board.mli, ocaml, ocamldep, quiet, traverse }
+/Users/ethan/.opam/cs3110-2021sp/bin/ocamldep.opt -modules board.mli > board.mli.depends # cached
+# Target: board.cmi, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:mli, file:board.mli, interf, ocaml, quiet, traverse }
+/Users/ethan/.opam/cs3110-2021sp/bin/ocamlc.opt -c -o board.cmi board.mli # cached
+# Target: board.ml.depends, tags: { package(ANSITerminal), package(ounit2), extension:ml, file:board.ml, ocaml, ocamldep, quiet, traverse }
+/Users/ethan/.opam/cs3110-2021sp/bin/ocamldep.opt -modules board.ml > board.ml.depends
+# Target: board.cmo, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:cmo, extension:ml, file:board.cmo, file:board.ml, implem, ocaml, quiet, traverse }
+/Users/ethan/.opam/cs3110-2021sp/bin/ocamlc.opt -c -o board.cmo board.ml
+# Compilation successful.
