@@ -20,15 +20,15 @@ ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules state.mli > st
 # Target: state.cmi, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:mli, file:state.mli, interf, ocaml, quiet, traverse }
 ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o state.cmi state.mli # cached
 # Target: state.ml.depends, tags: { package(ANSITerminal), package(ounit2), extension:ml, file:state.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules state.ml > state.ml.depends
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules state.ml > state.ml.depends # cached
 # Target: state.cmo, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:cmo, extension:ml, file:state.cmo, file:state.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o state.cmo state.ml
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o state.cmo state.ml # cached
 # Target: author.mli.depends, tags: { package(ANSITerminal), package(ounit2), extension:mli, file:author.mli, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules author.mli > author.mli.depends
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules author.mli > author.mli.depends # cached
 # Target: author.cmi, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:mli, file:author.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o author.cmi author.mli
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o author.cmi author.mli # cached
 # Target: author.ml.depends, tags: { package(ANSITerminal), package(ounit2), extension:ml, file:author.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules author.ml > author.ml.depends
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules author.ml > author.ml.depends # cached
 # Target: author.cmo, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:cmo, extension:ml, file:author.cmo, file:author.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o author.cmo author.ml
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o author.cmo author.ml # cached
 # Compilation successful.

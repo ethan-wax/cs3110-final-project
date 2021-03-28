@@ -1,3 +1,5 @@
+open Board 
+
 type t
 
 type move = string
