@@ -1,7 +1,7 @@
 open Board
 
 type result =
-  | Legal of (int * int) * (int * int)
+  | Legal of int list
   | Illegal
 
 (* Splits the user's input into an array *)
@@ -12,14 +12,10 @@ let is_int s = try int_of_string s with Failure f -> -1
 
 (** Checks if every member of list can be represented as the zero int or
     a positive int.*)
-let valid_list string_list =
-  let int_list = List.map is_int string_list in
-  let rec parse_list_helper lst =
-    match lst with
-    | [] -> true
-    | h :: t -> if h < 0 then false else parse_list_helper t
-  in
-  parse_list_helper int_list
+let rec valid_list int_list =
+  match int_list with
+  | [] -> true
+  | h :: t -> if h < 0 then false else valid_list t
 
 (* Assumes that 1 was already added to row and column to account for
    dots vs boxes board size *)
@@ -114,4 +110,14 @@ let valid_move int_list r c =
   else true
 
 (* need to check if list is not length 4*)
-let parse s = failwith "TODO"
+let parse s board =
+  let s_list = split_list s in
+  let int_list = List.map is_int s_list in
+  if List.length int_list <> 4 then Illegal
+  else if valid_list int_list = false then Illegal
+  else
+    let rc = Board.dimensions board in
+    match rc with
+    | r, c ->
+        if valid_move int_list r c = false then Illegal
+        else Legal int_list
