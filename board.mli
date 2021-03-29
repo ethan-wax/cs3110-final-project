@@ -15,5 +15,5 @@ val update_board : 'a -> 'b -> t -> t
 val get_branch : 'a -> color
 
 (** [dimensions board] are the dimensions of board, i.e. if the board
-    was 5x4 then dimension board would return (5,4)*)
+    was 4x5 then dimension board would return (4x5)*)
 val dimensions : t -> int * int
