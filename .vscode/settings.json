@@ -1,6 +1,6 @@
 {
   "ocaml.sandbox": {
     "kind": "opam",
-    "switch": "cs3110-2021sp"
+    "switch": "cs3110-project"
   }
 }
