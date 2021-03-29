@@ -1,5 +1,7 @@
-type result = 
-| Legal of (int*int)*(int*int)
-| Illegal 
+open Board
+
+type result =
+  | Legal of (int * int) * (int * int)
+  | Illegal
 
 let parse s = failwith "TODO"

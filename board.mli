@@ -13,3 +13,7 @@ val update_board : 'a -> 'b -> t -> t
 (** [get_branch points] is the color of the connection between [points]
     or blank if no connection exists*)
 val get_branch : 'a -> color
+
+(** [dimensions board] are the dimensions of board, i.e. if the board
+    was 5x4 then dimension board would return (5,4)*)
+val dimensions : t -> int * int
