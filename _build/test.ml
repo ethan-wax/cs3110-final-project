@@ -26,6 +26,25 @@ let fail_parse_test
 
 let default_board = make_board (4, 5)
 
+let square_board = make_board (6, 6)
+
+let one_by_one = make_board (1, 1)
+
+let dimension_test (name : string) (board : Board.t) expected_output :
+    test =
+  name >:: fun _ -> assert_equal expected_output (dimensions board)
+
+let get_branch_test (name :string) (points :(int*int)*(int*int)(board :Board.t) expected_output:
+test = 
+name >:: fun _ -> assert_equal expected_output (get_branch points board)
+
+let board_tests =
+  [
+    dimension_test "default board" default_board (4, 5);
+    dimension_test "square" square_board (6, 6);
+    dimension_test "one-by-one" one_by_one (1, 1);
+  ]
+
 let command_tests =
   [
     (* Four corners then going either up or down *)
@@ -37,7 +56,7 @@ let command_tests =
       [ 4; 0; 3; 0 ];
     valid_parse_test "top right down" "0 5 1 5" default_board
       [ 0; 5; 1; 5 ];
-    (* Four sides *)
+    (* Four sides then going either right or left *)
     valid_parse_test "top side right" "0 1 0 2" default_board
       [ 0; 1; 0; 2 ];
     valid_parse_test "bottom side left" "4 4 4 3" default_board
