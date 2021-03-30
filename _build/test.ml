@@ -20,10 +20,6 @@ let fail_parse_test
     (expected_output : Command.result) : test =
   name >:: fun _ -> assert_equal expected_output (parse move board)
 
-(** let start_room_test (name : string) (input : Adventure.t)
-    (expected_output : string) : test = name >:: fun _ -> assert_equal
-    expected_output (start_room input) ~printer:pp_string *)
-
 let default_board = make_board (4, 5)
 
 let square_board = make_board (6, 6)
@@ -34,9 +30,13 @@ let dimension_test (name : string) (board : Board.t) expected_output :
     test =
   name >:: fun _ -> assert_equal expected_output (dimensions board)
 
-let get_branch_test (name :string) (points :(int*int)*(int*int)(board :Board.t) expected_output:
-test = 
-name >:: fun _ -> assert_equal expected_output (get_branch points board)
+let get_branch_test
+    (name : string)
+    (points : (int * int) * (int * int))
+    (board : Board.t)
+    expected_output : test =
+  name >:: fun _ ->
+  assert_equal expected_output (get_branch points board)
 
 let board_tests =
   [
@@ -61,7 +61,7 @@ let command_tests =
       [ 0; 1; 0; 2 ];
     valid_parse_test "bottom side left" "4 4 4 3" default_board
       [ 4; 4; 4; 3 ];
-    valid_parse_test "left side right" "1 0 1 1" default_board
+    valid_parse_test "left side right" "1 0\n   1 1" default_board
       [ 1; 0; 1; 1 ];
     valid_parse_test "right side left" "1 5 1 4" default_board
       [ 1; 5; 1; 4 ];

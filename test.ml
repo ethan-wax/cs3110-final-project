@@ -76,6 +76,6 @@ let command_tests =
   ]
 
 let suite =
-  "test suite for final project" >::: List.flatten [ board_tests ]
+  "test suite for final project" >::: List.flatten [ command_tests ]
 
 let _ = run_test_tt_main suite

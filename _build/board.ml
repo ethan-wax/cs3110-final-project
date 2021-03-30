@@ -48,8 +48,8 @@ let make_board size =
   a
 
 let direction x1 x2 y1 y2 =
-  if x2 - x1 = 1 then Right
-  else if x1 - x2 = 1 then Left
+  if x2 - x1 = 1 then Left
+  else if x1 - x2 = 1 then Right
   else if y2 - y1 = 1 then Down
   else Up
 
@@ -74,7 +74,6 @@ let update_board points color board =
         board.(x).(y) <- { (board.(x).(y)) with down = Some color }
     | Up -> board.(x).(y) <- { (board.(x).(y)) with up = Some color }
   in
-
   update_point x1 y1 p1_direc;
   update_point x2 y2 p2_direc
 
