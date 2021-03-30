@@ -23,8 +23,8 @@ exception Out_of_Board
 let make_board size =
   assert (fst size > 0);
   assert (snd size > 0);
-  let rows = fst size in
-  let cols = snd size in
+  let rows = fst size + 1 in
+  let cols = snd size + 1 in
   let handle_edges arr =
     Array.iter (fun x -> x.left <- None) arr.(0);
     Array.iter (fun x -> x.right <- None) arr.(cols - 1);
