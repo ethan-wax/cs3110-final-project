@@ -18,8 +18,19 @@ type direc =
   | Up
   | Down
 
+exception Out_of_Board
+
 let make_board size =
-  (*handle edge cases*)
+  assert (fst size > 0);
+  assert (snd size > 0);
+  let rows = fst size in
+  let cols = snd size in
+  let handle_edges arr =
+    Array.iter (fun x -> x.left <- None) arr.(0);
+    Array.iter (fun x -> x.right <- None) arr.(cols - 1);
+    Array.iter (fun x -> x.(0).up <- None) arr;
+    Array.iter (fun x -> x.(rows - 1).down <- None) arr
+  in
   let start_point =
     {
       up = Some Blank;
@@ -28,7 +39,9 @@ let make_board size =
       right = Some Blank;
     }
   in
-  Array.make (fst size) (Array.make (snd size) start_point)
+  let arr = Array.make rows (Array.make cols start_point) in
+  handle_edges arr;
+  arr
 
 let direction x1 x2 y1 y2 =
   if x2 - x1 = 1 then Left
@@ -57,10 +70,23 @@ let update_board points color board =
   update_point x1 y1 p1_direc;
   update_point x2 y2 p2_direc
 
-let get_branch points =
+let get_branch points board =
   let point1, point2 = (fst points, snd points) in
   let x1, y1 = (fst point1, snd point1) in
   let x2, y2 = (fst point2, snd point2) in
-  failwith "TODO"
+  let d = direction x1 x2 y1 y2 in
+  let color_opt =
+    match d with
+    | Left -> board.(x1).(y1).left
+    | Right -> board.(x1).(y1).right
+    | Up -> board.(x1).(y1).up
+    | Down -> board.(x1).(y1).down
+  in
+  match color_opt with Some c -> c | None -> raise Out_of_Board
 
-let dimensions board = failwith "TODO"
+(* We're taking 1 off here becuase we are looking for the number of
+   boxes, while the length of the array is the number of points *)
+let dimensions board =
+  assert (Array.length board > 1);
+  assert (Array.length board.(0) > 1);
+  (Array.length board - 1, Array.length board.(0) - 1)
