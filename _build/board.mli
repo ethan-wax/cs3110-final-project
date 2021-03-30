@@ -3,8 +3,10 @@ type t
 type color
 
 (** [make_board size] initializes a new board with sizes indicated by
+
     [size]. Requires: Both values of [size] must be greater or equal to
     1. *)
+
 val make_board : int * int -> t
 
 (** [update_board points player board] is [board] with a new connection
