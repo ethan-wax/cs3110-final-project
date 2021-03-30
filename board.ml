@@ -4,10 +4,10 @@ type color =
   | Blue
 
 type point = {
-  mutable up : color option;
-  mutable down : color option;
-  mutable left : color option;
-  mutable right : color option;
+  up : color option;
+  down : color option;
+  left : color option;
+  right : color option;
 }
 
 type t = point array array
@@ -26,22 +26,26 @@ let make_board size =
   let rows = fst size + 1 in
   let cols = snd size + 1 in
   let handle_edges arr =
-    Array.iter (fun x -> x.left <- None) arr.(0);
-    Array.iter (fun x -> x.right <- None) arr.(cols - 1);
-    Array.iter (fun x -> x.(0).up <- None) arr;
-    Array.iter (fun x -> x.(rows - 1).down <- None) arr
+    Array.iter (fun x -> x.(0) <- { (x.(0)) with up = None }) arr;
+    Array.iter
+      (fun x -> x.(rows - 1) <- { (x.(rows - 1)) with down = None })
+      arr;
+    arr.(0) <- Array.map (fun x -> { x with left = None }) arr.(0);
+    arr.(cols - 1) <-
+      Array.map (fun x -> { x with right = None }) arr.(cols - 1)
   in
-  let start_point =
-    {
-      up = Some Blank;
-      down = Some Blank;
-      left = Some Blank;
-      right = Some Blank;
-    }
+  let a =
+    Array.make rows
+      (Array.make cols
+         {
+           up = Some Blank;
+           down = Some Blank;
+           left = Some Blank;
+           right = Some Blank;
+         })
   in
-  let arr = Array.make rows (Array.make cols start_point) in
-  handle_edges arr;
-  arr
+  handle_edges a;
+  a
 
 let direction x1 x2 y1 y2 =
   if x2 - x1 = 1 then Left
@@ -62,10 +66,13 @@ let update_board points color board =
     | Down -> Up
   in
   let update_point x y = function
-    | Left -> board.(x).(y).left <- color
-    | Right -> board.(x).(y).right <- color
-    | Down -> board.(x).(y).down <- color
-    | Up -> board.(x).(y).up <- color
+    | Left ->
+        board.(x).(y) <- { (board.(x).(y)) with left = Some color }
+    | Right ->
+        board.(x).(y) <- { (board.(x).(y)) with right = Some color }
+    | Down ->
+        board.(x).(y) <- { (board.(x).(y)) with down = Some color }
+    | Up -> board.(x).(y) <- { (board.(x).(y)) with up = Some color }
   in
   update_point x1 y1 p1_direc;
   update_point x2 y2 p2_direc
