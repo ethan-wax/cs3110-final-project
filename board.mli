@@ -8,7 +8,7 @@ val make_board : int * int -> t
 
 (** [update_board points player board] is [board] with a new connection
     between [points] owned by [player]*)
-val update_board : 'a -> 'b -> t -> t
+val update_board : (int * int) * (int * int) -> color -> t -> unit
 
 (** [get_branch points] is the color of the connection between [points]
     or blank if no connection exists*)
