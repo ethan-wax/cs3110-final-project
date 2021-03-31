@@ -94,20 +94,14 @@ let valid_move int_list r c =
   else if r1 = 0 && c1 == 0 then
     if top_left r2 c2 = false then false
     else true (* Checks bottom right *)
-  else if r1 = r && c1 = c then
-    if bottom_right r1 c1 r2 c2 = false then false else true
-  else if r1 = r && c1 = 0 then
-    if bottom_left r1 c1 r2 c2 = false then false else true
-  else if r1 = 0 && c1 = c then
-    if top_right r1 c1 r2 c2 = false then false else true
-  else if r1 = 0 then if top_side c1 r2 c2 = false then false else true
-  else if r1 = r then
-    if bottom_side r1 c1 r2 c2 = false then false else true
-  else if c1 = 0 then if left_side r1 r2 c2 = false then false else true
-  else if c1 = c then
-    if right_side r1 c1 r2 c2 = false then false else true
-  else if middle r1 c1 r2 c2 = false then false
-  else true
+  else if r1 = r && c1 = c then bottom_right r1 c1 r2 c2
+  else if r1 = r && c1 = 0 then bottom_left r1 c1 r2 c2
+  else if r1 = 0 && c1 = c then top_right r1 c1 r2 c2
+  else if r1 = 0 then top_side c1 r2 c2
+  else if r1 = r then bottom_side r1 c1 r2 c2
+  else if c1 = 0 then left_side r1 r2 c2
+  else if c1 = c then right_side r1 c1 r2 c2
+  else middle r1 c1 r2 c2
 
 (* need to check if list is not length 4*)
 let parse s board =
