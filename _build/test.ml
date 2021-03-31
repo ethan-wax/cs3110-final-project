@@ -61,7 +61,7 @@ let command_tests =
       [ 0; 1; 0; 2 ];
     valid_parse_test "bottom side left" "4 4 4 3" default_board
       [ 4; 4; 4; 3 ];
-    valid_parse_test "left side right" "1 0\n   1 1" default_board
+    valid_parse_test "left side right" "1 0 1 1" default_board
       [ 1; 0; 1; 1 ];
     valid_parse_test "right side left" "1 5 1 4" default_board
       [ 1; 5; 1; 4 ];
