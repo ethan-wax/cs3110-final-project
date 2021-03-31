@@ -28,11 +28,11 @@ let make_board size =
   let handle_edges arr =
     Array.iter (fun x -> x.(0) <- { (x.(0)) with up = None }) arr;
     Array.iter
-      (fun x -> x.(rows - 1) <- { (x.(rows - 1)) with down = None })
+      (fun x -> x.(cols - 1) <- { (x.(cols - 1)) with down = None })
       arr;
     arr.(0) <- Array.map (fun x -> { x with left = None }) arr.(0);
-    arr.(cols - 1) <-
-      Array.map (fun x -> { x with right = None }) arr.(cols - 1)
+    arr.(rows - 1) <-
+      Array.map (fun x -> { x with right = None }) arr.(rows - 1)
   in
   let a =
     Array.make rows
