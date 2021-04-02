@@ -68,6 +68,12 @@ let command_tests =
     (* in the middle*)
     valid_parse_test "middle down" "2 3 3 3" default_board
       [ 2; 3; 3; 3 ];
+    valid_parse_test "middle down with spaces start" "    2 3 3 3"
+      default_board [ 2; 3; 3; 3 ];
+    valid_parse_test "middle down with spaces inbetween" "2   3  3   3"
+      default_board [ 2; 3; 3; 3 ];
+    valid_parse_test "middle down with spaces end" "2 3 3 3   "
+      default_board [ 2; 3; 3; 3 ];
     (* Failing tests *)
     fail_parse_test "negative bounds" "-1 0 1 0" default_board Illegal;
     fail_parse_test "non numbers in input" "words" default_board Illegal;

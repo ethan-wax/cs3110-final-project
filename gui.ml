@@ -1,4 +1,6 @@
 open Graphics
+open Command
+open Board
 
 let draw_points_mxn location m n =
   match location with
@@ -28,13 +30,47 @@ let draw_counter loc count =
       moveto x y;
       draw_string (string_of_int count)
 
+let rec int_list_to_string lst s =
+  match lst with
+  | [] -> s
+  | h :: t ->
+      if s <> "" then int_list_to_string t (s ^ " " ^ string_of_int h)
+      else int_list_to_string t (s ^ string_of_int h)
+
+let rec char_list_to_string lst s =
+  match lst with
+  | [] -> s
+  | h :: t -> char_list_to_string t (s ^ Char.escaped h)
+
 let acc = ref [||]
+
+(* - User input as char - Stored as char array - Press enter - Convert
+   char array into a string (command_issued) - Goes into
+   display_valid_move (parse) - display_valid_move is unit displaying on
+   board - Then call player input (mutually recursive) *)
+let display_valid_move s =
+  let default_board = make_board (4, 5) in
+  let parsed = parse s default_board in
+  moveto 275 130;
+  match parsed with
+  | Legal move ->
+      draw_string ("Legal move: " ^ int_list_to_string move "")
+  | Illegal -> draw_string "This is an illegal move!"
 
 let rec player_input () =
   let event = wait_next_event [ Key_pressed ] in
   match event.key with
   | 'q' -> close_graph ()
+  | '\r' -> command_issued acc
   | key -> char_input acc key
+
+and command_issued acc =
+  (* //convert array into a string pass that string into
+     display_valid_move make the array empty player_input()*)
+  let a = Array.to_list !acc in
+  let str = char_list_to_string a "" in
+  display_valid_move str;
+  player_input ()
 
 and char_input acc key =
   acc := Array.append !acc [| key |];

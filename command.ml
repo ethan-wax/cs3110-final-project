@@ -4,8 +4,11 @@ type result =
   | Legal of int list
   | Illegal
 
-(* Splits the user's input into an array *)
-let split_list s = String.split_on_char ' ' s
+(* Splits the user's input into an list, with any leading, trailing,
+   inbetween spaces removed.*)
+let split_list s =
+  let str = String.split_on_char ' ' s in
+  List.filter (fun a -> a <> "") str
 
 (** Checks if s can be represented as int*)
 let is_int s = try int_of_string s with Failure f -> -1

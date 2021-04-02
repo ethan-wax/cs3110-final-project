@@ -1,1 +1,1 @@
-gui.ml: Array Graphics List
+gui.ml: Array Board Char Command Graphics List
