@@ -1,3 +1,4 @@
+(** The abstract type of a board. *)
 type t
 
 type color
@@ -21,3 +22,9 @@ val get_branch : (int * int) * (int * int) -> t -> color
     was 4x5 then dimension board would return (4x5). Requires: [board]
     has nonzero dimensions. *)
 val dimensions : t -> int * int
+
+(** [score board] is a tuple with the scores of the players. *)
+val score : t -> int * int
+
+(** [end_game board] is whether or not the game has been finished. *)
+val end_game : t -> bool
