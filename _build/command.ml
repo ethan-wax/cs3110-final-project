@@ -104,7 +104,6 @@ let valid_move int_list r c =
   else if c1 = c then right_side r1 c1 r2 c2
   else middle r1 c1 r2 c2
 
-(* need to check if list is not length 4*)
 let parse s board =
   let s_list = split_list s in
   let int_list = List.map is_int s_list in

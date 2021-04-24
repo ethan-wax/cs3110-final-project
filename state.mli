@@ -4,8 +4,12 @@ open Player
 
 type t
 
-type move = Result
+type state_result
+
+(* move represents a valid move on the board. Precondition: *)
+type move = int list
 
 (** [go board player move] is the board that is created after [player]
-    makes [move] on [board] *)
-val go : Board.t -> Player.t -> move -> Board.t
+    makes [move] on [board]. Returns Invalid if the move has already
+    been made on the board. *)
+val go : Board.t -> Player.t -> move -> state_result
