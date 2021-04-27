@@ -4,7 +4,9 @@ open Player
 
 type t
 
-type state_result
+type state_result =
+  | Valid of Board.t
+  | Invalid
 
 (* move represents a valid move on the board. Precondition: *)
 type move = int list
