@@ -1,7 +1,11 @@
 open Board
 
-type t = int
+type t = {
+  players : string * string;
+  score : int * int;
+  board : Board.t;
+}
 
 type move = string
 
-let go a = failwith "TODO"
+let go brd plyr mv = failwith "TODO"
