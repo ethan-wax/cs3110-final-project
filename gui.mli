@@ -25,6 +25,8 @@ val draw_points_mxn : int * int -> int -> int -> unit
    loc on the board.*)
 val draw_counter : int * int -> int -> unit
 
-(* [interactive ()] waits for user input and responds depending on which
-   key is pressed *)
-val player_input : unit -> unit
+(* OUTDATED MLI---------------------- *)
+
+(* [player_input () board] waits for user input and responds depending
+   on which key is pressed *)
+val player_input : unit -> Board.t -> unit

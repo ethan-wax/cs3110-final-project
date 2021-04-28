@@ -13,6 +13,20 @@ let draw_points_mxn location m n =
         done
       done
 
+let draw_row_labels rows =
+  for i = 0 to rows do
+    set_color black;
+    moveto 92 (793 - (i * 100));
+    draw_string (string_of_int i)
+  done
+
+let draw_col_labels cols =
+  for i = 0 to cols do
+    set_color black;
+    moveto (146 + (i * 100)) 850;
+    draw_string (string_of_int i)
+  done
+
 let draw_move coordinates =
   set_color (rgb 120 120 120);
   set_line_width 12;
@@ -29,6 +43,20 @@ let draw_counter loc count =
   | x, y ->
       moveto x y;
       draw_string (string_of_int count)
+
+let draw_counters board =
+  moveto 50 50;
+  set_color red;
+  draw_string "Red: ";
+  (* Set up counter label Blue *)
+  moveto 700 50;
+  set_color blue;
+  draw_string "Blue: ";
+  let scores = Board.score board in
+  match scores with
+  | p1, p2 ->
+      draw_counter (90, 50) p1;
+      draw_counter (750, 50) p2
 
 let rec int_list_to_string lst s =
   match lst with
@@ -58,9 +86,8 @@ let display_line move =
    char array into a string (command_issued) - Goes into
    display_valid_move (parse) - display_valid_move is unit displaying on
    board - Then call player input (mutually recursive) *)
-let display_valid_move s =
-  let default_board = make_board (5, 5) in
-  let parsed = parse s default_board in
+let display_valid_move s board =
+  let parsed = parse s board in
   moveto 275 130;
   match parsed with
   | Legal move ->
@@ -68,68 +95,53 @@ let display_valid_move s =
       moveto 275 130;
       draw_string ("Legal move: " ^ int_list_to_string move "")
   | Illegal ->
+      display_line [ 0; 0; 0; 0 ];
       moveto 275 130;
       draw_string "This is an illegal move!"
 
-let rec player_input () =
+let rec player_input () board =
   let event = wait_next_event [ Key_pressed ] in
   match event.key with
   | 'q' -> close_graph ()
-  | '\r' -> command_issued acc
-  | key -> char_input acc key
+  | '\r' -> command_issued acc board
+  | key -> char_input acc key board
 
-and command_issued acc =
+and command_issued acc board =
   (* //convert array into a string pass that string into
      display_valid_move make the array empty player_input()*)
   let a = Array.to_list !acc in
   let str = char_list_to_string a "" in
   set_color white;
   fill_rect 250 100 300 75;
-  display_valid_move str;
+  display_valid_move str board;
   acc := [||];
-  player_input ()
+  player_input () board
 
-and char_input acc key =
+and char_input acc key board =
   acc := Array.append !acc [| key |];
   moveto 275 150;
   for i = 0 to Array.length !acc - 1 do
     draw_char (Array.get !acc i)
   done;
-  player_input ()
+  player_input () board
 
 let draw_board =
+  let default_board = make_board (5, 5) in
   open_graph "";
   resize_window 800 1000;
   set_window_title "Dots and Boxes";
-  (* background = Graphics.rgb 217 175 0; *)
-  (* Coodinates are x y plane *)
   clear_graph ();
-  (* Set up counter label Red *)
-  moveto 50 50;
-  set_text_size 500;
-  set_color red;
-  draw_string "Red: ";
-  (* Set up counter label Blue *)
-  moveto 700 50;
-  set_color blue;
-  draw_string "Blue: ";
   (* Set up Game Title *)
   moveto 350 900;
   set_color black;
   draw_string "Dots and Boxes!";
   draw_points_mxn (150, 300) 5 5;
-  (* Draw current move *)
-  (* draw_move [ 150; 300; 150; 400 ]; *)
-  (* Draws current box *)
-  (* draw_box 100 [ 150; 300 ] [ 255; 0; 0 ]; *)
-  (* Draws counter red *)
   set_color black;
-  draw_counter (90, 50) 2;
-  (* Draws counter blue *)
-  set_color black;
-  draw_counter (750, 50) 3;
   set_line_width 3;
   draw_rect 250 100 300 75;
-  player_input ()
+  draw_counters default_board;
+  draw_row_labels 5;
+  draw_col_labels 5;
+  player_input () default_board
 
 let open_board = draw_board
