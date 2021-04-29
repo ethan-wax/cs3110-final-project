@@ -1,4 +1,6 @@
 open Board
+open Command
+open Player
 
 type t = {
   players : string * string;
@@ -6,6 +8,22 @@ type t = {
   board : Board.t;
 }
 
-type move = string
+type state_result =
+  | Valid of Board.t * (int * int) list
+  | Invalid
 
-let go brd plyr mv = failwith "TODO"
+type move = int list
+
+let go brd plyr mv =
+  assert (List.length mv = 4);
+  let move =
+    match mv with
+    | [ a; b; c; d ] -> ((a, b), (c, d))
+    | _ -> failwith "Invalid move Error"
+  in
+  let check_move = Board.get_branch move brd in
+  match check_move with
+  | Red | Blue -> Invalid
+  | Blank ->
+      update_board move (Player.color plyr) brd;
+      Valid (brd, [])

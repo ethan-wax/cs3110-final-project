@@ -1,7 +1,10 @@
 (** The abstract type of a board. *)
 type t
 
-type color
+type color =
+  | Blank
+  | Red
+  | Blue
 
 (** [make_board size] initializes a new board with sizes indicated by
     [size]. Requires: Both values of [size] must be greater or equal to

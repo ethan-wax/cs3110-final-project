@@ -44,18 +44,32 @@ let rec char_list_to_string lst s =
 
 let acc = ref [||]
 
+let display_line move =
+  match move with
+  | [ r1; c1; r2; c2 ] ->
+      let x1 = 150 + (100 * c1) in
+      let y1 = 800 - (100 * r1) in
+      let x2 = 150 + (100 * c2) in
+      let y2 = 800 - (100 * r2) in
+      draw_move [ x1; y1; x2; y2 ]
+  | _ -> failwith "Precondition violated"
+
 (* - User input as char - Stored as char array - Press enter - Convert
    char array into a string (command_issued) - Goes into
    display_valid_move (parse) - display_valid_move is unit displaying on
    board - Then call player input (mutually recursive) *)
 let display_valid_move s =
-  let default_board = make_board (4, 5) in
+  let default_board = make_board (5, 5) in
   let parsed = parse s default_board in
   moveto 275 130;
   match parsed with
   | Legal move ->
+      display_line move;
+      moveto 275 130;
       draw_string ("Legal move: " ^ int_list_to_string move "")
-  | Illegal -> draw_string "This is an illegal move!"
+  | Illegal ->
+      moveto 275 130;
+      draw_string "This is an illegal move!"
 
 let rec player_input () =
   let event = wait_next_event [ Key_pressed ] in
@@ -69,7 +83,10 @@ and command_issued acc =
      display_valid_move make the array empty player_input()*)
   let a = Array.to_list !acc in
   let str = char_list_to_string a "" in
+  set_color white;
+  fill_rect 250 100 300 75;
   display_valid_move str;
+  acc := [||];
   player_input ()
 
 and char_input acc key =
@@ -100,11 +117,11 @@ let draw_board =
   moveto 350 900;
   set_color black;
   draw_string "Dots and Boxes!";
-  draw_points_mxn (150, 300) 4 5;
+  draw_points_mxn (150, 300) 5 5;
   (* Draw current move *)
-  draw_move [ 150; 300; 150; 400 ];
+  (* draw_move [ 150; 300; 150; 400 ]; *)
   (* Draws current box *)
-  draw_box 100 [ 150; 300 ] [ 255; 0; 0 ];
+  (* draw_box 100 [ 150; 300 ] [ 255; 0; 0 ]; *)
   (* Draws counter red *)
   set_color black;
   draw_counter (90, 50) 2;

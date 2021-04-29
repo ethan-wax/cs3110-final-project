@@ -10,7 +10,12 @@ type point = {
   right : color option;
 }
 
-type t = point array array
+type t = {
+  board : point array array;
+  score : int * int;
+  full : bool;
+  dim : int * int;
+}
 
 type direc =
   | Left
@@ -45,15 +50,41 @@ let make_board size =
          })
   in
   handle_edges a;
-  a
+  {
+    board = a;
+    score = (0, 0);
+    full = false;
+    dim = (rows - 1, cols - 1);
+  }
 
 let direction x1 x2 y1 y2 =
-  if x2 - x1 = 1 then Left
-  else if x1 - x2 = 1 then Right
+  if x2 - x1 = 1 then Right
+  else if x1 - x2 = 1 then Left
   else if y2 - y1 = 1 then Down
   else Up
 
+let get_branch points board =
+  let brd = board.board in
+  let point1, point2 = (fst points, snd points) in
+  let x1, y1 = (fst point1, snd point1) in
+  let x2, y2 = (fst point2, snd point2) in
+  let d = direction x1 x2 y1 y2 in
+  let color_opt =
+    match d with
+    | Left -> brd.(x1).(y1).left
+    | Right -> brd.(x1).(y1).right
+    | Up -> brd.(x1).(y1).up
+    | Down -> brd.(x1).(y1).down
+  in
+  match color_opt with Some c -> c | None -> raise Out_of_Board
+
+let branch_filled points board =
+  match get_branch points board with
+  | Red | Blue -> true
+  | Blank -> false
+
 let update_board points color board =
+  let brd = board.board in
   let point1, point2 = (fst points, snd points) in
   let x1, y1 = (fst point1, snd point1) in
   let x2, y2 = (fst point2, snd point2) in
@@ -66,34 +97,18 @@ let update_board points color board =
     | Down -> Up
   in
   let update_point x y = function
-    | Left ->
-        board.(x).(y) <- { (board.(x).(y)) with left = Some color }
-    | Right ->
-        board.(x).(y) <- { (board.(x).(y)) with right = Some color }
-    | Down ->
-        board.(x).(y) <- { (board.(x).(y)) with down = Some color }
-    | Up -> board.(x).(y) <- { (board.(x).(y)) with up = Some color }
+    | Left -> brd.(x).(y) <- { (brd.(x).(y)) with left = Some color }
+    | Right -> brd.(x).(y) <- { (brd.(x).(y)) with right = Some color }
+    | Down -> brd.(x).(y) <- { (brd.(x).(y)) with down = Some color }
+    | Up -> brd.(x).(y) <- { (brd.(x).(y)) with up = Some color }
   in
   update_point x1 y1 p1_direc;
   update_point x2 y2 p2_direc
 
-let get_branch points board =
-  let point1, point2 = (fst points, snd points) in
-  let x1, y1 = (fst point1, snd point1) in
-  let x2, y2 = (fst point2, snd point2) in
-  let d = direction x1 x2 y1 y2 in
-  let color_opt =
-    match d with
-    | Left -> board.(x1).(y1).left
-    | Right -> board.(x1).(y1).right
-    | Up -> board.(x1).(y1).up
-    | Down -> board.(x1).(y1).down
-  in
-  match color_opt with Some c -> c | None -> raise Out_of_Board
-
 (* We're taking 1 off here becuase we are looking for the number of
    boxes, while the length of the array is the number of points *)
-let dimensions board =
-  assert (Array.length board > 1);
-  assert (Array.length board.(0) > 1);
-  (Array.length board - 1, Array.length board.(0) - 1)
+let dimensions board = board.dim
+
+let score board = board.score
+
+let end_game board = board.full
