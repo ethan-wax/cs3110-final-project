@@ -2,9 +2,17 @@ open OUnit2
 open Board
 open Command
 open Player
+open State
 
 let extract_t (st : result) =
-  match st with Legal t -> t | Illegal -> raise (failwith "no info")
+  match st with Legal t -> t | Illegal -> failwith "no info"
+
+let extract_brd (st : state_result) =
+  match st with Valid (brd, _) -> brd | Invalid -> failwith "No Board"
+
+let default_player = create_player "Player 1" "Red"
+
+let second_player = create_player "Player 2" "Blue"
 
 let valid_parse_test
     (name : string)
@@ -21,11 +29,31 @@ let fail_parse_test
     (expected_output : Command.result) : test =
   name >:: fun _ -> assert_equal expected_output (parse move board)
 
+let string_printer str = str
+
+let int_tuple_printer tup =
+  string_of_int (fst tup) ^ ", " ^ string_of_int (snd tup)
+
 let default_board = make_board (4, 5)
 
 let square_board = make_board (6, 6)
 
 let one_by_one = make_board (1, 1)
+
+let board_with_move =
+  update_board ((0, 0), (1, 0)) Red (make_board (4, 5))
+
+let board_with_box =
+  update_board
+    ((0, 1), (0, 0))
+    Blue
+    (update_board
+       ((1, 1), (0, 1))
+       Red
+       (update_board
+          ((1, 0), (1, 1))
+          Blue
+          (update_board ((0, 0), (1, 0)) Red (make_board (1, 1)))))
 
 let dimension_test (name : string) (board : Board.t) expected_output :
     test =
@@ -39,31 +67,63 @@ let get_branch_test
   name >:: fun _ ->
   assert_equal expected_output (get_branch points board)
 
-let default_player = create_player "Player 1" "Red"
+let score_test
+    (name : string)
+    (board : Board.t)
+    (expected_output : int * int) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (score board) ~printer:int_tuple_printer
 
 let player_name_test
     (name : string)
     (player : Player.t)
     (expected_output : string) : test =
-  name >:: fun _ -> assert_equal expected_output (Player.name player)
+  name >:: fun _ ->
+  assert_equal expected_output (Player.name player)
+    ~printer:string_printer
 
 let player_color_test
     (name : string)
     (player : Player.t)
     (expected_output : string) : test =
-  name >:: fun _ -> assert_equal expected_output (Player.color player)
+  name >:: fun _ ->
+  assert_equal expected_output
+    (Player.color_string player)
+    ~printer:string_printer
 
 let player_tests =
   [
     player_name_test "Get Player 1 name" default_player "Player 1";
+    player_name_test "Get Player 2 name" second_player "Player 2";
     player_color_test "Get Player 1 color" default_player "Red";
+    player_color_test "Get Player 2 color" second_player "Blue";
   ]
 
 let board_tests =
   [
+    (* Testing Board.dimensions *)
     dimension_test "default board" default_board (4, 5);
     dimension_test "square" square_board (6, 6);
     dimension_test "one-by-one" one_by_one (1, 1);
+    (* Testing Board.get_branch *)
+    get_branch_test "default board has no branch (0,0) -> (1,0)"
+      ((0, 0), (1, 0))
+      default_board Blank;
+    get_branch_test "board with move has a red branch (0,0) -> (1,0)"
+      ((0, 0), (1, 0))
+      board_with_move Red;
+    get_branch_test "board with move has a red branch (1,0) -> (0,0)"
+      ((1, 0), (0, 0))
+      board_with_move Red;
+    get_branch_test "board with box has a red branch (0,0) -> (1,0)"
+      ((0, 0), (1, 0))
+      board_with_box Red;
+    get_branch_test "board with box has a blue branch (0,0) -> (0,1)"
+      ((0, 0), (0, 1))
+      board_with_box Blue;
+    (* Testing Board.score *)
+    score_test "default board has score (0,0)" default_board (0, 0);
+    score_test "board with box has score (0,1)" board_with_box (0, 1);
   ]
 
 let command_tests =

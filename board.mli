@@ -14,7 +14,7 @@ val make_board : int * int -> t
 (** [update_board points player board] is [board] with a new connection
     between [points] owned by [player]. Requires: There must be a valid
     path between the two points. *)
-val update_board : (int * int) * (int * int) -> color -> t -> unit
+val update_board : (int * int) * (int * int) -> color -> t -> t
 
 (** [get_branch points board] is the color of the connection between
     [points] or blank if no connection exists. Requires: There must be a

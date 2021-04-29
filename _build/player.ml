@@ -6,6 +6,12 @@ let name player = fst player
 
 let color player = snd player
 
+let color_string player =
+  match snd player with
+  | Red -> "Red"
+  | Blue -> "Blue"
+  | Blank -> "Blank"
+
 let create_player name color =
   assert (color = "Red" || color = "Blue");
   let clr =

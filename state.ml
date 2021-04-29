@@ -3,7 +3,7 @@ open Command
 open Player
 
 type t = {
-  players : string * string;
+  players : Player.t * Player.t;
   score : int * int;
   board : Board.t;
 }
@@ -25,5 +25,5 @@ let go brd plyr mv =
   match check_move with
   | Red | Blue -> Invalid
   | Blank ->
-      update_board move (Player.color plyr) brd;
-      Valid (brd, [])
+      let new_brd = update_board move (Player.color plyr) brd in
+      Valid (new_brd, [])
