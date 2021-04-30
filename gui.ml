@@ -89,8 +89,10 @@ let display_line move =
   | _ -> failwith "Precondition violated"
 
 let display_current_player player =
-  set_color black;
   moveto 275 200;
+  set_color white;
+  fill_rect 275 200 100 20;
+  set_color black;
   draw_string (Player.name player ^ "'s move")
 
 (* - User input as char - Stored as char array - Press enter - Convert
@@ -103,7 +105,7 @@ let display_valid_move s board player =
   match parsed with
   | Legal move ->
       display_line move;
-      display_current_player player1;
+      display_current_player player2;
       moveto 275 130;
       draw_string ("Legal move: " ^ int_list_to_string move "")
   | Illegal ->
@@ -123,7 +125,7 @@ and command_issued acc board player =
      display_valid_move make the array empty player_input()*)
   let a = Array.to_list !acc in
   let str = char_list_to_string a "" in
-  set_color red;
+  set_color white;
   fill_rect 250 100 300 75;
   display_valid_move str board player;
   acc := [||];
