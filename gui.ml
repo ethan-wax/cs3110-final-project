@@ -44,10 +44,29 @@ let draw_box len pos rgb_col =
     (rgb (List.nth rgb_col 0) (List.nth rgb_col 1) (List.nth rgb_col 2));
   fill_rect (List.nth pos 0) (List.nth pos 1) len len
 
+let draw_boxes lst =
+  if List.length lst = 0 then ()
+  else if List.length lst = 1 then
+    (* One box filled *)
+    match List.hd lst with
+    | r, c ->
+        draw_box 100 [ 150 + (100 * r); 700 - (100 * c) ] [ 255; 0; 0 ]
+  else
+    (* Two boxes filled with one move *)
+    let r1 = fst (List.hd lst) in
+    let c1 = snd (List.hd lst) in
+    let r2 = fst (List.nth lst 1) in
+    let c2 = snd (List.nth lst 1) in
+    draw_box 100 [ 150 + (100 * r1); 700 - (100 * c1) ] [ 255; 0; 0 ];
+    draw_box 100 [ 150 + (100 * r2); 700 - (100 * c2) ] [ 255; 0; 0 ]
+
 let draw_counter loc count =
   match loc with
   | x, y ->
       moveto x y;
+      set_color white;
+      fill_rect x y 20 20;
+      set_color black;
       draw_string (string_of_int count)
 
 let draw_counters board =
@@ -103,15 +122,25 @@ let display_valid_move s board player =
   let parsed = parse s board in
   moveto 275 250;
   match parsed with
-  | Legal move ->
-      display_line move;
-      display_current_player player2;
-      moveto 275 130;
-      draw_string ("Legal move: " ^ int_list_to_string move "")
+  | Legal move -> (
+      match State.go board player move with
+      | Valid (bo, li) ->
+          display_line move;
+          draw_boxes li;
+          moveto 275 130;
+          draw_string ("Legal move: " ^ int_list_to_string move "");
+          if Player.name player = Player.name player1 then (bo, player2)
+          else (bo, player1)
+      | Invalid ->
+          display_line [ 0; 0; 0; 0 ];
+          moveto 275 130;
+          draw_string "This move has already been done!";
+          (board, player))
   | Illegal ->
       display_line [ 0; 0; 0; 0 ];
       moveto 275 130;
-      draw_string "This is an illegal move!"
+      draw_string "This is an illegal move!";
+      (board, player)
 
 let rec player_input () board player =
   let event = wait_next_event [ Key_pressed ] in
@@ -127,9 +156,11 @@ and command_issued acc board player =
   let str = char_list_to_string a "" in
   set_color white;
   fill_rect 250 100 300 75;
-  display_valid_move str board player;
+  let new_setup = display_valid_move str board player in
   acc := [||];
-  player_input () board player
+  draw_counters (fst new_setup);
+  display_current_player (snd new_setup);
+  player_input () (fst new_setup) (snd new_setup)
 
 and char_input acc key board player =
   acc := Array.append !acc [| key |];
