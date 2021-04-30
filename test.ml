@@ -91,6 +91,13 @@ let player_color_test
     (Player.color_string player)
     ~printer:string_printer
 
+let end_game_test
+    (name : string)
+    (board : Board.t)
+    (expected_output : bool) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (end_game board) ~printer:string_of_bool
+
 let player_tests =
   [
     player_name_test "Get Player 1 name" default_player "Player 1";
@@ -124,6 +131,11 @@ let board_tests =
     (* Testing Board.score *)
     score_test "default board has score (0,0)" default_board (0, 0);
     score_test "board with box has score (0,1)" board_with_box (0, 1);
+    (* Testing Board.end_game *)
+    end_game_test "default board has not reached end game" default_board
+      false;
+    end_game_test "board with box has reached end game" board_with_box
+      true;
   ]
 
 let command_tests =

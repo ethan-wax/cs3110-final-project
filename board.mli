@@ -31,3 +31,7 @@ val score : t -> int * int
 
 (** [end_game board] is whether or not the game has been finished. *)
 val end_game : t -> bool
+
+(** [last_filled board] is the boxes that were last filled in the
+    previous move if any. *)
+val last_filled : t -> (int * int) list

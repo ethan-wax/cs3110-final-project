@@ -26,4 +26,4 @@ let go brd plyr mv =
   | Red | Blue -> Invalid
   | Blank ->
       let new_brd = update_board move (Player.color plyr) brd in
-      Valid (new_brd, [])
+      Valid (new_brd, last_filled brd)

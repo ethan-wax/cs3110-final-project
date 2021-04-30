@@ -1,6 +1,12 @@
 open Graphics
 open Command
 open Board
+open State
+open Player
+
+let player1 = create_player "Player 1" "Red"
+
+let player2 = create_player "Player 2" "Blue"
 
 let draw_points_mxn location m n =
   match location with
@@ -82,16 +88,22 @@ let display_line move =
       draw_move [ x1; y1; x2; y2 ]
   | _ -> failwith "Precondition violated"
 
+let display_current_player player =
+  set_color black;
+  moveto 275 200;
+  draw_string (Player.name player ^ "'s move")
+
 (* - User input as char - Stored as char array - Press enter - Convert
    char array into a string (command_issued) - Goes into
    display_valid_move (parse) - display_valid_move is unit displaying on
    board - Then call player input (mutually recursive) *)
-let display_valid_move s board =
+let display_valid_move s board player =
   let parsed = parse s board in
-  moveto 275 130;
+  moveto 275 250;
   match parsed with
   | Legal move ->
       display_line move;
+      display_current_player player1;
       moveto 275 130;
       draw_string ("Legal move: " ^ int_list_to_string move "")
   | Illegal ->
@@ -99,31 +111,31 @@ let display_valid_move s board =
       moveto 275 130;
       draw_string "This is an illegal move!"
 
-let rec player_input () board =
+let rec player_input () board player =
   let event = wait_next_event [ Key_pressed ] in
   match event.key with
   | 'q' -> close_graph ()
-  | '\r' -> command_issued acc board
-  | key -> char_input acc key board
+  | '\r' -> command_issued acc board player
+  | key -> char_input acc key board player
 
-and command_issued acc board =
+and command_issued acc board player =
   (* //convert array into a string pass that string into
      display_valid_move make the array empty player_input()*)
   let a = Array.to_list !acc in
   let str = char_list_to_string a "" in
-  set_color white;
+  set_color red;
   fill_rect 250 100 300 75;
-  display_valid_move str board;
+  display_valid_move str board player;
   acc := [||];
-  player_input () board
+  player_input () board player
 
-and char_input acc key board =
+and char_input acc key board player =
   acc := Array.append !acc [| key |];
   moveto 275 150;
   for i = 0 to Array.length !acc - 1 do
     draw_char (Array.get !acc i)
   done;
-  player_input () board
+  player_input () board player
 
 let draw_board =
   let default_board = make_board (5, 5) in
@@ -142,6 +154,7 @@ let draw_board =
   draw_counters default_board;
   draw_row_labels 5;
   draw_col_labels 5;
-  player_input () default_board
+  display_current_player player1;
+  player_input () default_board player1
 
 let open_board = draw_board
