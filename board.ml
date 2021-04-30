@@ -82,6 +82,8 @@ let get_branch points board =
   in
   match color_opt with Some c -> c | None -> raise Out_of_Board
 
+let dimensions board = board.dim
+
 let branch_filled points board =
   match get_branch points board with
   | Red | Blue -> true
@@ -118,18 +120,59 @@ let update_board points color board =
             branch_filled ((x, y), (x, y - 1)) board
             && branch_filled ((x, y - 1), (x + 1, y - 1)) board
             && branch_filled ((x + 1, y - 1), (x + 1, y)) board
+          then update_score board color;
+        if not (y + 1 > snd (dimensions board)) then
+          if
+            branch_filled ((x, y), (x, y + 1)) board
+            && branch_filled ((x, y + 1), (x + 1, y + 1)) board
+            && branch_filled ((x + 1, y + 1), (x + 1, y)) board
           then update_score board color
-    | _ -> ()
+    | Left ->
+        if not (y - 1 < 0) then
+          if
+            branch_filled ((x, y), (x, y - 1)) board
+            && branch_filled ((x, y - 1), (x - 1, y - 1)) board
+            && branch_filled ((x - 1, y - 1), (x - 1, y)) board
+          then update_score board color;
+        if not (y + 1 > snd (dimensions board)) then
+          if
+            branch_filled ((x, y), (x, y + 1)) board
+            && branch_filled ((x, y + 1), (x - 1, y + 1)) board
+            && branch_filled ((x - 1, y + 1), (x - 1, y)) board
+          then update_score board color
+    | Up ->
+        if not (x - 1 < 0) then
+          if
+            branch_filled ((x, y), (x - 1, y)) board
+            && branch_filled ((x - 1, y), (x - 1, y - 1)) board
+            && branch_filled ((x - 1, y - 1), (x, y - 1)) board
+          then update_score board color;
+        if not (x + 1 > fst (dimensions board)) then
+          if
+            branch_filled ((x, y), (x + 1, y)) board
+            && branch_filled ((x + 1, y), (x + 1, y - 1)) board
+            && branch_filled ((x + 1, y - 1), (x, y - 1)) board
+          then update_score board color
+    | Down ->
+        if not (x - 1 < 0) then
+          if
+            branch_filled ((x, y), (x - 1, y)) board
+            && branch_filled ((x - 1, y), (x - 1, y + 1)) board
+            && branch_filled ((x - 1, y + 1), (x, y + 1)) board
+          then update_score board color;
+        if not (x + 1 > fst (dimensions board)) then
+          if
+            branch_filled ((x, y), (x + 1, y)) board
+            && branch_filled ((x + 1, y), (x + 1, y + 1)) board
+            && branch_filled ((x + 1, y + 1), (x, y + 1)) board
+          then update_score board color
   in
   update_point x1 y1 p1_direc;
   update_point x2 y2 p2_direc;
   check_box x1 y1 p1_direc;
+  board.branches_remaining <- board.branches_remaining - 1;
   if board.branches_remaining = 0 then { board with full = true }
   else board
-
-(* We're taking 1 off here becuase we are looking for the number of
-   boxes, while the length of the array is the number of points *)
-let dimensions board = board.dim
 
 let score board = board.score
 
