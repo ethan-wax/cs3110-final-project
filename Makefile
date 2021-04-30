@@ -1,4 +1,4 @@
-MODULES=board command state author gui player 
+MODULES=board player command state author gui 
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
