@@ -18,10 +18,10 @@ val draw_move : int list -> unit
    length 3 where each index represents r, g, b in the rgb color model. *)
 val draw_box : int -> int list -> int list -> unit
 
-(* [draw board location m n ] draws a grid of circles, with the
+(* [draw grid location m n ] draws a grid of circles, with the
    respective amount of m rows and n columns, starting at the top left
    of the board. *)
-val draw_points_mxn : int * int -> int -> int -> unit
+val draw_grid : int * int -> int -> int -> unit
 
 (* [draw_counter loc count] Displays the score count of a player at a
    loc on the board.*)

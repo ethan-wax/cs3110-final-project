@@ -8,14 +8,14 @@ let player1 = create_player "Player 1" "Red"
 
 let player2 = create_player "Player 2" "Blue"
 
-let draw_points_mxn location m n =
+let draw_grid location m n =
   match location with
   | x, y ->
       (* Drawing points *)
       for i = 0 to n do
         for j = 0 to m do
           set_color (rgb 97 97 97);
-          fill_circle (x + (i * 100)) (y + (j * 100)) 15
+          fill_circle (x + (i * 100)) (y - (j * 100)) 15
         done
       done
 
@@ -158,9 +158,35 @@ and command_issued acc board player =
   fill_rect 250 100 300 75;
   let new_setup = display_valid_move str board player in
   acc := [||];
-  draw_counters (fst new_setup);
-  display_current_player (snd new_setup);
-  player_input () (fst new_setup) (snd new_setup)
+  let brd = fst new_setup in
+  let plyr = snd new_setup in
+  draw_counters brd;
+  display_current_player plyr;
+  if Board.end_game brd then end_game brd plyr
+  else player_input () brd plyr
+
+and end_game brd plyr =
+  set_color white;
+  fill_rect 0 0 800 1000;
+  set_color black;
+  moveto 300 550;
+  match Board.score brd with
+  | p1score, p2score ->
+      if p1score > p2score then
+        draw_string
+          (Player.name player1 ^ " wins, the game is over! GGWP")
+      else
+        draw_string
+          (Player.name player2 ^ " wins, the game is over! GGWP");
+      moveto 300 500;
+      set_color red;
+      draw_string
+        (Player.name player1 ^ " score: " ^ string_of_int p1score);
+      moveto 300 450;
+      set_color blue;
+      draw_string
+        (Player.name player2 ^ " score: " ^ string_of_int p2score);
+      player_input () brd plyr
 
 and char_input acc key board player =
   acc := Array.append !acc [| key |];
@@ -171,7 +197,9 @@ and char_input acc key board player =
   player_input () board player
 
 let draw_board =
-  let default_board = make_board (5, 5) in
+  let rows = 1 in
+  let cols = 1 in
+  let default_board = make_board (rows, cols) in
   open_graph "";
   resize_window 800 1000;
   set_window_title "Dots and Boxes";
@@ -180,7 +208,7 @@ let draw_board =
   moveto 350 900;
   set_color black;
   draw_string "Dots and Boxes!";
-  draw_points_mxn (150, 300) 5 5;
+  draw_grid (150, 800) rows cols;
   set_color black;
   set_line_width 3;
   draw_rect 250 100 300 75;
