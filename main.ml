@@ -3,6 +3,11 @@ open Command
 open State
 open Player
 
+type ai =
+  | Easy
+  | Medium
+  | Hard
+
 let init_board = Board.make_board (5, 5)
 
 let player1 = create_player "Player 1" "Red"
