@@ -12,10 +12,6 @@ let player2 = create_player "Player 2" "Blue"
 
 let easy_bot = create_player "Easy Bot" "Blue"
 
-let medium_bot = create_player "Medium Bot" "Blue"
-
-let hard_bot = create_player "Hard Bot" "Blue"
-
 (* When the game ends, displays who won and each players respective
    score*)
 let display_endgame board =
@@ -44,6 +40,7 @@ let rec loop_mode mode =
   match read_line () with
   | exception End_of_file -> ()
   | player_input ->
+      let player_input = String.trim player_input in
       if player_input = "Multiplayer" then
         loop_game init_board player1 "" "Multiplayer"
       else if player_input = "Easy" then
@@ -80,7 +77,7 @@ and parse_ai_input board player move level =
         | Valid (bo, li) ->
             (* If player did not get a box, switches to other player's
                turn *)
-            if List.length li = 0 then failwith "unip"
+            if List.length li = 0 then bot_move board level
             else loop_game bo player "" level
         | Invalid ->
             print_string "Position already occupied, try again. \n";
@@ -90,6 +87,26 @@ and parse_ai_input board player move level =
           ("\n" ^ Player.name player
          ^ ", your move was invalid. Try again!\n");
         loop_game board player move level
+
+and bot_move board level =
+  let move =
+    if level = "Easy" then Ai.easy board
+    else if level = "Medium" then Ai.medium board
+    else Ai.hard board
+  in
+  ANSITerminal.print_string [ ANSITerminal.red ]
+    ("\nBot move: " ^ move ^ "\n");
+  match Command.parse move board with
+  | Legal t -> (
+      match State.go board easy_bot t with
+      | Valid (bo, li) ->
+          (* If player did not get a box, switches to other player's
+             turn *)
+          if List.length li = 0 then loop_game bo player1 "" level
+          else bot_move bo level
+      | Invalid ->
+          failwith "impossible, bot will always make a valid move")
+  | Illegal -> failwith "impossible, bot will always make a valid move"
 
 and parse_input board player move =
   if String.trim move = "quit" then exit 0;
