@@ -6,4 +6,5 @@
 #load "player.cmo";;
 #load "state.cmo";;
 #load "command.cmo";;
+#load "ai.cmo"
 #load "graphics.cma";;
