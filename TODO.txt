@@ -1,0 +1,7 @@
+Fix bug with board filled box move
+Add tests for everything
+Implement easy ai
+Implement medium ai
+Implement hard ai
+Text based playing for ai
+GUI playing for ai
