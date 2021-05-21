@@ -110,6 +110,7 @@ and bot_move board level =
 
 and parse_input board player move =
   if String.trim move = "quit" then exit 0;
+  if String.trim move = "print" then print_board board player "Mult";
   if String.trim move = "score" then score board player "Mult"
   else
     match Command.parse move board with
@@ -141,6 +142,46 @@ and score board player mode =
     ^ string_of_int (snd (Board.score board))
     ^ "\n-------------------------" ^ "\n");
   loop_game board player "" mode
+
+and print_board board player mode =
+  let row1 = row_colors board 0 0 5 in
+  let row2 = row_colors board 0 1 5 in
+  let row3 = row_colors board 0 2 5 in
+  let row4 = row_colors board 0 3 5 in
+  let row5 = row_colors board 0 4 5 in
+  let row6 = row_colors board 0 5 5 in
+  let col1 = col_colors board 0 0 5 in
+  let col2 = col_colors board 1 0 5 in
+  let col3 = col_colors board 2 0 5 in
+  let col4 = col_colors board 3 0 5 in
+  let col5 = col_colors board 4 0 5 in
+  let col6 = col_colors board 5 0 5 in
+  let rows = [ row1; row2; row3; row4; row5; row6 ] in
+  let cols = [ col1; col2; col3; col4; col5; col6 ] in
+  print_rows rows;
+  loop_game board player "" mode
+
+(* Row_colors returns a list with just the colors in each row. I is the
+   current index it is on, and j is what it is going to*)
+and row_colors board x y j =
+  let c = get_branch ((x, y), (x + 1, y)) board in
+  if j - x = 1 then [ string_of_color c ]
+  else string_of_color c :: row_colors board (x + 1) y j
+
+and col_colors board x y j =
+  let c = get_branch ((x, y), (x, y + 1)) board in
+  if j - y = 1 then [ string_of_color c ]
+  else string_of_color c :: col_colors board x (y + 1) j
+
+and string_of_color c =
+  match c with Red -> "R" | Blue -> "B" | Blank -> "N"
+
+and print_rows rows =
+  let print_row r =
+    List.iter print_string r;
+    print_string "\n-------------------------\n"
+  in
+  List.iter print_row rows
 
 let main () =
   ANSITerminal.print_string [ ANSITerminal.red ]

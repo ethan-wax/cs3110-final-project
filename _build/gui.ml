@@ -8,14 +8,14 @@ let player1 = create_player "Player 1" "Red"
 
 let player2 = create_player "Player 2" "Blue"
 
-let draw_points_mxn location m n =
+let draw_grid location m n =
   match location with
   | x, y ->
       (* Drawing points *)
       for i = 0 to n do
         for j = 0 to m do
           set_color (rgb 97 97 97);
-          fill_circle (x + (i * 100)) (y + (j * 100)) 15
+          fill_circle (x + (i * 100)) (y - (j * 100)) 15
         done
       done
 
@@ -44,10 +44,29 @@ let draw_box len pos rgb_col =
     (rgb (List.nth rgb_col 0) (List.nth rgb_col 1) (List.nth rgb_col 2));
   fill_rect (List.nth pos 0) (List.nth pos 1) len len
 
+let draw_boxes lst =
+  if List.length lst = 0 then ()
+  else if List.length lst = 1 then
+    (* One box filled *)
+    match List.hd lst with
+    | r, c ->
+        draw_box 100 [ 150 + (100 * r); 700 - (100 * c) ] [ 255; 0; 0 ]
+  else
+    (* Two boxes filled with one move *)
+    let r1 = fst (List.hd lst) in
+    let c1 = snd (List.hd lst) in
+    let r2 = fst (List.nth lst 1) in
+    let c2 = snd (List.nth lst 1) in
+    draw_box 100 [ 150 + (100 * r1); 700 - (100 * c1) ] [ 255; 0; 0 ];
+    draw_box 100 [ 150 + (100 * r2); 700 - (100 * c2) ] [ 255; 0; 0 ]
+
 let draw_counter loc count =
   match loc with
   | x, y ->
       moveto x y;
+      set_color white;
+      fill_rect x y 20 20;
+      set_color black;
       draw_string (string_of_int count)
 
 let draw_counters board =
@@ -89,8 +108,10 @@ let display_line move =
   | _ -> failwith "Precondition violated"
 
 let display_current_player player =
-  set_color black;
   moveto 275 200;
+  set_color white;
+  fill_rect 275 200 100 20;
+  set_color black;
   draw_string (Player.name player ^ "'s move")
 
 (* - User input as char - Stored as char array - Press enter - Convert
@@ -101,15 +122,25 @@ let display_valid_move s board player =
   let parsed = parse s board in
   moveto 275 250;
   match parsed with
-  | Legal move ->
-      display_line move;
-      display_current_player player1;
-      moveto 275 130;
-      draw_string ("Legal move: " ^ int_list_to_string move "")
+  | Legal move -> (
+      match State.go board player move with
+      | Valid (bo, li) ->
+          display_line move;
+          draw_boxes li;
+          moveto 275 130;
+          draw_string ("Legal move: " ^ int_list_to_string move "");
+          if Player.name player = Player.name player1 then (bo, player2)
+          else (bo, player1)
+      | Invalid ->
+          display_line [ 0; 0; 0; 0 ];
+          moveto 275 130;
+          draw_string "This move has already been done!";
+          (board, player))
   | Illegal ->
       display_line [ 0; 0; 0; 0 ];
       moveto 275 130;
-      draw_string "This is an illegal move!"
+      draw_string "This is an illegal move!";
+      (board, player)
 
 let rec player_input () board player =
   let event = wait_next_event [ Key_pressed ] in
@@ -123,11 +154,39 @@ and command_issued acc board player =
      display_valid_move make the array empty player_input()*)
   let a = Array.to_list !acc in
   let str = char_list_to_string a "" in
-  set_color red;
+  set_color white;
   fill_rect 250 100 300 75;
-  display_valid_move str board player;
+  let new_setup = display_valid_move str board player in
   acc := [||];
-  player_input () board player
+  let brd = fst new_setup in
+  let plyr = snd new_setup in
+  draw_counters brd;
+  display_current_player plyr;
+  if Board.end_game brd then end_game brd plyr
+  else player_input () brd plyr
+
+and end_game brd plyr =
+  set_color white;
+  fill_rect 0 0 800 1000;
+  set_color black;
+  moveto 300 550;
+  match Board.score brd with
+  | p1score, p2score ->
+      if p1score > p2score then
+        draw_string
+          (Player.name player1 ^ " wins, the game is over! GGWP")
+      else
+        draw_string
+          (Player.name player2 ^ " wins, the game is over! GGWP");
+      moveto 300 500;
+      set_color red;
+      draw_string
+        (Player.name player1 ^ " score: " ^ string_of_int p1score);
+      moveto 300 450;
+      set_color blue;
+      draw_string
+        (Player.name player2 ^ " score: " ^ string_of_int p2score);
+      player_input () brd plyr
 
 and char_input acc key board player =
   acc := Array.append !acc [| key |];
@@ -138,7 +197,9 @@ and char_input acc key board player =
   player_input () board player
 
 let draw_board =
-  let default_board = make_board (5, 5) in
+  let rows = 1 in
+  let cols = 1 in
+  let default_board = make_board (rows, cols) in
   open_graph "";
   resize_window 800 1000;
   set_window_title "Dots and Boxes";
@@ -147,7 +208,7 @@ let draw_board =
   moveto 350 900;
   set_color black;
   draw_string "Dots and Boxes!";
-  draw_points_mxn (150, 300) 5 5;
+  draw_grid (150, 800) rows cols;
   set_color black;
   set_line_width 3;
   draw_rect 250 100 300 75;

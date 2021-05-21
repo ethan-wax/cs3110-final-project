@@ -4,6 +4,11 @@ open Command
 open Player
 open State
 
+let color_printer = function
+  | Red -> "Red"
+  | Blue -> "Blue"
+  | Blank -> "Blank"
+
 let extract_t (st : result) =
   match st with Legal t -> t | Illegal -> failwith "no info"
 
@@ -36,6 +41,8 @@ let int_tuple_printer tup =
 
 let default_board = make_board (4, 5)
 
+let init_board = make_board (5, 5)
+
 let square_board = make_board (6, 6)
 
 let one_by_one = make_board (1, 1)
@@ -55,6 +62,35 @@ let board_with_box =
           Blue
           (update_board ((0, 0), (1, 0)) Red (make_board (1, 1)))))
 
+let big_board_with_two_boxes =
+  update_board
+    ((3, 3), (3, 4))
+    Blue
+    (update_board
+       ((3, 4), (4, 4))
+       Red
+       (update_board
+          ((4, 4), (4, 3))
+          Blue
+          (update_board
+             ((3, 3), (4, 3))
+             Red
+             (update_board
+                ((0, 1), (0, 0))
+                Blue
+                (update_board
+                   ((1, 1), (0, 1))
+                   Red
+                   (update_board
+                      ((1, 0), (1, 1))
+                      Blue
+                      (update_board
+                         ((0, 0), (1, 0))
+                         Red
+                         (make_board (5, 5)))))))))
+
+let bug_target = update_board ((3, 3), (3, 4)) Red (make_board (5, 5))
+
 let dimension_test (name : string) (board : Board.t) expected_output :
     test =
   name >:: fun _ -> assert_equal expected_output (dimensions board)
@@ -65,7 +101,9 @@ let get_branch_test
     (board : Board.t)
     expected_output : test =
   name >:: fun _ ->
-  assert_equal expected_output (get_branch points board)
+  assert_equal expected_output
+    (get_branch points board)
+    ~printer:color_printer
 
 let score_test
     (name : string)
@@ -128,6 +166,64 @@ let board_tests =
     get_branch_test "board with box has a blue branch (0,0) -> (0,1)"
       ((0, 0), (0, 1))
       board_with_box Blue;
+    get_branch_test
+      "bug target board should have no branch (4,3) -> (4,4)"
+      ((4, 3), (4, 4))
+      bug_target Blank;
+    get_branch_test "bug target should have a branch (3,3) -> (3,4)"
+      ((3, 3), (3, 4))
+      bug_target Red;
+    get_branch_test "init board should have no branch (4,4) -> (4,3)"
+      ((4, 4), (4, 3))
+      init_board Blank;
+    get_branch_test "bbwtb has a branch (0,0) -> (1,0)"
+      ((0, 0), (1, 0))
+      big_board_with_two_boxes Red;
+    get_branch_test "bbwtb has a branch (1,0) -> (1,1)"
+      ((1, 0), (1, 1))
+      big_board_with_two_boxes Blue;
+    get_branch_test "bbwtb has a branch (1,1) -> (0,1)"
+      ((1, 1), (0, 1))
+      big_board_with_two_boxes Red;
+    get_branch_test "bbwtb has a branch (0,1) -> (0,0)"
+      ((0, 1), (0, 0))
+      big_board_with_two_boxes Blue;
+    get_branch_test "bbwtb has a branch (3,3) -> (3,4)"
+      ((3, 3), (3, 4))
+      big_board_with_two_boxes Blue;
+    get_branch_test "bbwtb has a branch (3,4) -> (4,4)"
+      ((3, 4), (4, 4))
+      big_board_with_two_boxes Red;
+    get_branch_test "bbwtb has a branch (4,4) -> (4,3)"
+      ((4, 4), (4, 3))
+      big_board_with_two_boxes Blue;
+    get_branch_test "bbwtb has a branch (4,3) -> (3,3)"
+      ((4, 3), (3, 3))
+      big_board_with_two_boxes Red;
+    get_branch_test "bbwtb has no branch (0,1) -> (0,2)"
+      ((0, 1), (0, 2))
+      big_board_with_two_boxes Blank;
+    get_branch_test "bbwtb has no branch (1,1) -> (1,2)"
+      ((1, 1), (1, 2))
+      big_board_with_two_boxes Blank;
+    get_branch_test "bbwtb has no branch (1,1) -> (2,1)"
+      ((1, 1), (2, 1))
+      big_board_with_two_boxes Blank;
+    get_branch_test "bbwtb has no branch (1,0) -> (2,0)"
+      ((2, 0), (1, 0))
+      big_board_with_two_boxes Blank;
+    get_branch_test "bbwtb has no branch (3,3) -> (2,3)"
+      ((3, 3), (2, 3))
+      big_board_with_two_boxes Blank;
+    get_branch_test "bbwtb has no branch (3,3) -> (3,2)"
+      ((3, 3), (3, 2))
+      big_board_with_two_boxes Blank;
+    get_branch_test "bbwtb has no branch (4,3) -> (4,2)"
+      ((4, 3), (4, 2))
+      big_board_with_two_boxes Blank;
+    get_branch_test "bbwtb has no branch (4,3) -> (5,3)"
+      ((4, 3), (5, 3))
+      big_board_with_two_boxes Blank;
     (* Testing Board.score *)
     score_test "default board has score (0,0)" default_board (0, 0);
     score_test "board with box has score (0,1)" board_with_box (0, 1);
