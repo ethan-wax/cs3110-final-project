@@ -5,7 +5,7 @@ open Player
 val open_board : unit
 
 (** Draws the text per red or blue player *)
-val draw_board : unit
+val draw_board : int * int -> int * int -> int * int * int * int -> unit
 
 (** [draw_move coordinates] takes a list of coordinates which is are
     starting and ending points Ex: 1 3 4 2 represents (1,3) (4,2).
