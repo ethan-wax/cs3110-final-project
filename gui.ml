@@ -8,6 +8,16 @@ let player1 = create_player "Player 1" "Red"
 
 let player2 = create_player "Player 2" "Blue"
 
+let instructions =
+  [
+    "To make a move, type in this format: 'r1 c2 r2 c2'";
+    "The indices are zero indexed- the top left corner represents '0 0'";
+    "For example, the move from the top left corner to the dot to the \
+     right of it would be encoded as:";
+    "'0 0 0 1', since you are moving from the 0th row and 0th column \
+     to the 0th row and the 1st column.";
+  ]
+
 let draw_grid location m n =
   match location with
   | x, y ->
@@ -205,12 +215,21 @@ let window_dimensions = (800, 1000)
 
 let counter_dimensions = (250, 100, 300, 75)
 
+let init_graph pos = open_graph ""
+
+let draw_instructions pos =
+  for i = 0 to List.length instructions - 1 do
+    match pos with
+    | x, y ->
+        moveto x (y - (i * 15));
+        draw_string (List.nth instructions i)
+  done
+
 let draw_board brd_dim win_dim count_dim =
   let default_board = make_board (fst brd_dim, snd brd_dim) in
-  open_graph "";
+  init_graph (0, 0);
   resize_window (fst win_dim) (snd win_dim);
   set_window_title "Dots and Boxes";
-  clear_graph ();
   (* Set up Game Title *)
   moveto 350 900;
   set_color black;
@@ -218,6 +237,7 @@ let draw_board brd_dim win_dim count_dim =
   draw_grid (150, 800) (fst brd_dim) (snd brd_dim);
   set_color black;
   set_line_width 3;
+  draw_instructions (130, 980);
   match counter_dimensions with
   | x, y, w, h ->
       draw_rect x y w h;

@@ -12,8 +12,19 @@ let player2 = create_player "Player 2" "Blue"
 
 let bot = create_player "Easy Bot" "Blue"
 
+(* The number of moves player 1 has made *)
+let p1moves = ref 0
+
+(* The number of moves player 2 has made *)
+let p2moves = ref 0
+
+(* The number of moves the bot has made *)
+let botmoves = ref 0
+
+let inc_move player_moves = incr player_moves
+
 (* When the game ends, displays who won and each players respective
-   score*)
+   score *)
 let display_endgame board =
   match Board.score board with
   | p1score, p2score ->
@@ -61,8 +72,12 @@ and loop_game board player input mode =
     | exception End_of_file -> ()
     | player_move -> parse_input board player player_move mode
 
+(* Based on the players input, either quits out of the game , shows the
+   player stats, shows the board, shows the score, or makes a move.*)
 and parse_input board player player_move mode =
   if String.trim player_move = "quit" then exit 0;
+  if String.trim player_move = "stats" then
+    player_stats board player mode;
   if String.trim player_move = "board" then
     print_board board player mode;
   if String.trim player_move = "score" then score board player mode
@@ -79,6 +94,7 @@ and parse_ai_input board player move level =
       | Valid (bo, li) ->
           (* If player did not get a box, switches to other player's
              turn *)
+          inc_move p1moves;
           if List.length li = 0 then bot_move board level
           else loop_game bo player "" level
       | Invalid ->
@@ -104,6 +120,7 @@ and bot_move board level =
       | Valid (bo, li) ->
           (* If player did not get a box, switches to other player's
              turn *)
+          inc_move botmoves;
           if List.length li = 0 then loop_game bo player1 "" level
           else bot_move bo level
       | Invalid ->
@@ -117,11 +134,17 @@ and parse_mult_input board player move =
       | Valid (bo, li) ->
           (* If player did not get a box, switches to other player's
              turn *)
+          if Player.name player = Player.name player1 then
+            inc_move p1moves
+          else inc_move p2moves;
           if List.length li = 0 then
             if Player.name player = Player.name player1 then
               loop_game bo player2 "" "Mult"
             else loop_game bo player1 "" "Mult"
-          else loop_game bo player "" "Mult"
+          else
+            (*(if Player.name = Player.name player1 then inc_move
+              p1moves else inc_move p2moves) *)
+            loop_game bo player "" "Mult"
       | Invalid ->
           print_string "Position already occupied, try again. \n";
           loop_game board player move "Mult")
@@ -139,6 +162,20 @@ and score board player mode =
     ^ "\n" ^ Player.name player2 ^ " score: "
     ^ string_of_int (snd (Board.score board))
     ^ "\n-------------------------" ^ "\n");
+  loop_game board player "" mode
+
+and player_stats board player mode =
+  print_string
+    ("\n" ^ "-------------------------\n" ^ Player.name player1
+   ^ " moves: " ^ string_of_int !p1moves ^ "\n");
+  if mode = "Mult" then
+    print_string
+      (Player.name player2 ^ " moves: " ^ string_of_int !p2moves
+     ^ "\n-------------------------" ^ "\n")
+  else
+    print_string
+      (Player.name bot ^ " moves: " ^ string_of_int !botmoves
+     ^ "\n-------------------------" ^ "\n");
   loop_game board player "" mode
 
 and print_board board player mode =
@@ -184,7 +221,8 @@ and print_rows rows =
 let main () =
   ANSITerminal.print_string [ ANSITerminal.red ]
     "\n\n\
-     Welcome to Dots and Boxes!. Type 'quit' to exit the game and \n\
+     Welcome to Dots and Boxes!. Type 'quit' to exit the game, type \
+     'stats' to view the game statistics, and \n\
     \    'score' to view the score.\n";
   print_string "> ";
   loop_mode ""
