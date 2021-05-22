@@ -274,7 +274,7 @@ let draw_board brd_dim win_dim count_dim =
   set_color black;
   set_line_width 3;
   draw_instructions (130, 980);
-  match counter_dimensions with
+  match count_dim with
   | x, y, w, h ->
       draw_rect x y w h;
       draw_counters default_board;

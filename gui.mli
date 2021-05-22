@@ -19,6 +19,10 @@ val draw_move : int list -> unit
     model. *)
 val draw_box : int -> int list -> int list -> unit
 
+(** [draw_boxes lst player] draws the boxes on the board based on the
+    player and the number of boxes the player can fill. *)
+val draw_boxes : (int * int) list -> Player.t -> unit
+
 (** [draw grid location m n ] draws a grid of circles, with the
     respective amount of m rows and n columns, starting at the top left
     of the board. *)
@@ -28,8 +32,27 @@ val draw_grid : int * int -> int -> int -> unit
     loc on the board.*)
 val draw_counter : int * int -> int -> unit
 
-(* OUTDATED MLI---------------------- *)
+(** [draw_counters board] Displays the respective color and score
+    counters for both players *)
+val draw_counters : Board.t -> unit
+
+(** [display_valid_move s board player mode] displays moves based on
+    what mode is passed in. If the mode is "Mult" then multiplayer mode
+    starts, otherwise the mode is the chosen AI difficulty. Moves for
+    each player is displayed on the board. *)
+val display_valid_move :
+  string -> Board.t -> Player.t -> string -> Board.t * Player.t
 
 (** [player_input () board] waits for user input and responds depending
-    on which key is pressed *)
+    on which key is pressed. Displays respective player moves and shows
+    end game screen. *)
 val player_input : unit -> Board.t -> Player.t -> string -> unit
+
+(** [draw_instructions pos] takes in a position and draws the
+    instructions on the board *)
+val draw_instructions : int * int -> unit
+
+(** [draw_board brd_dim win_dim count_dim] draws the board based on
+    board dimensions, window dimensions, and count dimensions. Displays
+    grid, labels, counters, players, instructions, and moves. *)
+val draw_board : int * int -> int * int -> int * int * int * int -> unit
