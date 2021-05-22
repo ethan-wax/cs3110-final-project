@@ -25,23 +25,29 @@ let inc_move player_moves = incr player_moves
 
 (* When the game ends, displays who won and each players respective
    score *)
-let display_endgame board =
+let display_endgame board mode =
+  let p2name =
+    if mode = "Mult" then Player.name player2
+    else if mode = "Easy" then "Easy Bot"
+    else if mode = "Medium" then "Medium Bot"
+    else "Hard Bot"
+  in
   match Board.score board with
   | p1score, p2score ->
       if p1score > p2score then
         print_string
-          ("\n" ^ Player.name player1
-         ^ " wins, the game is over! GGWP\n" ^ Player.name player1
-         ^ " score: " ^ string_of_int p1score ^ "\n"
-         ^ Player.name player2 ^ " score: " ^ string_of_int p2score
-         ^ "\n")
+          ("\n" ^ "------------------------------\n"
+         ^ Player.name player1 ^ " wins, the game is over! GGWP\n"
+         ^ Player.name player1 ^ " score: " ^ string_of_int p1score
+         ^ "\n" ^ p2name ^ " score: " ^ string_of_int p2score ^ "\n"
+         ^ "------------------------------\n")
       else
         print_string
-          ("\n" ^ Player.name player2
+          ("\n" ^ "------------------------------\n" ^ p2name
          ^ " wins, the game is over! GGWP\n" ^ Player.name player1
-         ^ " score: " ^ string_of_int p1score ^ "\n"
-         ^ Player.name player2 ^ " score: " ^ string_of_int p2score
-         ^ "\n")
+         ^ " score: " ^ string_of_int p1score ^ "\n" ^ p2name
+         ^ " score: " ^ string_of_int p2score ^ "\n"
+         ^ "------------------------------\n")
 
 let rec loop_mode mode =
   ANSITerminal.print_string [ ANSITerminal.red ] mode;
@@ -53,7 +59,7 @@ let rec loop_mode mode =
   | player_input ->
       let player_input = String.trim player_input in
       if player_input = "Multiplayer" then
-        loop_game init_board player1 "" "Multiplayer"
+        loop_game init_board player1 "" "Mult"
       else if player_input = "Easy" then
         loop_game init_board player1 "" "Easy"
       else if player_input = "Medium" then
@@ -63,7 +69,7 @@ let rec loop_mode mode =
       else loop_mode "\n Error: Not a valid mode!\n"
 
 and loop_game board player input mode =
-  if Board.end_game board then display_endgame board
+  if Board.end_game board then display_endgame board mode
   else
     let playername = Player.name player in
     print_endline (playername ^ "'s" ^ " turn.\n");
@@ -122,10 +128,11 @@ and bot_move board level =
              turn *)
           inc_move botmoves;
           if List.length li = 0 then loop_game bo player1 "" level
+          else if Board.end_game bo then display_endgame bo level
           else bot_move bo level
       | Invalid ->
           failwith "impossible, bot will always make a valid move")
-  | Illegal -> failwith "impossible, bot will always make a valid move"
+  | Illegal -> failwith "impossible, bot will always make a legal move"
 
 and parse_mult_input board player move =
   match Command.parse move board with

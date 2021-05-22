@@ -21,6 +21,9 @@ val update_board : (int * int) * (int * int) -> color -> t -> t
     valid path between the two points *)
 val get_branch : (int * int) * (int * int) -> t -> color
 
+(** [branch_filled points board] have to write the spec. *)
+val branch_filled : (int * int) * (int * int) -> t -> bool
+
 (** [dimensions board] are the dimensions of board, i.e. if the board
     was 4x5 then dimension board would return (4x5). Requires: [board]
     has nonzero dimensions. *)
