@@ -329,23 +329,37 @@ let medium_bot_test
 
 let board_with_no_edge_moves =
   update_board
-    ((0, 0), (1, 0))
+    ((2, 1), (2, 2))
     Blue
     (update_board
-       ((0, 0), (1, 0))
-       Blue
+       ((2, 0), (2, 1))
+       Red
        (update_board
-          ((1, 0), (2, 0))
-          Red
+          ((0, 1), (0, 2))
+          Blue
           (update_board
-             ((1, 0), (1, 1))
-             Blue
-             (update_board ((0, 0), (1, 0)) Red (make_board (2, 2))))))
+             ((0, 0), (0, 1))
+             Red
+             (update_board
+                ((1, 2), (2, 2))
+                Blue
+                (update_board
+                   ((0, 2), (1, 2))
+                   Red
+                   (update_board
+                      ((1, 0), (2, 0))
+                      Blue
+                      (update_board
+                         ((0, 0), (1, 0))
+                         Red
+                         (make_board (2, 2)))))))))
 
 let ai_tests =
   [
     medium_bot_test "blank board, move should be on the edge"
       default_board true;
+    medium_bot_test "board with no edge moves available"
+      board_with_no_edge_moves false;
   ]
 
 let suite =
