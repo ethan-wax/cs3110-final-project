@@ -1,3 +1,12 @@
+(** Test plan: The test plan should be located in a comment at the top
+    of the test file. -4: The test plan is missing. -1: The test plan
+    does not explain which parts of the system were automatically tested
+    by OUnit vs. manually tested. -1: The test plan does not explain
+    what modules were tested by OUnit and how test cases were developed
+    (black box, glass box, randomized, etc.). -1: The test plan does not
+    provide an argument for why the testing approach demonstrates the
+    correctness of the system. *)
+
 open OUnit2
 open Board
 open Command

@@ -63,15 +63,15 @@ let draw_boxes lst player =
   else if List.length lst = 1 then
     (* One box filled *)
     match List.hd lst with
-    | r, c -> draw_box 100 [ 150 + (100 * r); 700 - (100 * c) ] col
+    | r, c -> draw_box 100 [ 150 + (100 * c); 700 - (100 * r) ] col
   else
     (* Two boxes filled with one move *)
     let r1 = fst (List.hd lst) in
     let c1 = snd (List.hd lst) in
     let r2 = fst (List.nth lst 1) in
     let c2 = snd (List.nth lst 1) in
-    draw_box 100 [ 150 + (100 * r1); 700 - (100 * c1) ] col;
-    draw_box 100 [ 150 + (100 * r2); 700 - (100 * c2) ] col
+    draw_box 100 [ 150 + (100 * c1); 700 - (100 * r1) ] col;
+    draw_box 100 [ 150 + (100 * c2); 700 - (100 * r2) ] col
 
 let draw_counter loc count =
   match loc with

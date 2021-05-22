@@ -36,10 +36,20 @@ let easy board =
   valid_moves := [||];
   ai_move
 
+let list_to_tuple lst =
+  match lst with
+  | [ x; y; z; d ] -> ((x, y), (z, d))
+  | _ -> failwith "unimp"
+
 let medium board =
   get_empty_branches board;
   let rand_index = Random.int (Array.length !valid_moves - 1) in
   let ai_move = Array.get !valid_moves rand_index in
+  let move_point_lst = String.split_on_char ' ' ai_move in
+  let move_filtered_lst =
+    List.filter (fun a -> a <> "") move_point_lst
+  in
+  let tuple_move = list_to_tuple move_filtered_lst in
   valid_moves := [||];
   ai_move
 
