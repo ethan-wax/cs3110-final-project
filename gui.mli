@@ -32,4 +32,4 @@ val draw_counter : int * int -> int -> unit
 
 (** [player_input () board] waits for user input and responds depending
     on which key is pressed *)
-val player_input : unit -> Board.t -> Player.t -> unit
+val player_input : unit -> Board.t -> Player.t -> string -> unit

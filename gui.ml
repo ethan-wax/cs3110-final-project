@@ -3,10 +3,13 @@ open Board
 open State
 open Player
 open Graphics
+open Ai
 
 let player1 = create_player "Player 1" "Red"
 
 let player2 = create_player "Player 2" "Blue"
+
+let bot = create_player "Bot" "Blue"
 
 let instructions =
   [
@@ -131,7 +134,7 @@ let display_current_player player =
    char array into a string (command_issued) - Goes into
    display_valid_move (parse) - display_valid_move is unit displaying on
    board - Then call player input (mutually recursive) *)
-let display_valid_move s board player =
+let rec display_valid_move s board player mode =
   let parsed = parse s board in
   moveto 275 250;
   match parsed with
@@ -142,8 +145,12 @@ let display_valid_move s board player =
           draw_boxes li player;
           moveto 275 130;
           draw_string ("Legal move: " ^ int_list_to_string move "");
-          if Player.name player = Player.name player1 then (bo, player2)
-          else (bo, player1)
+          if mode = "Mult" then
+            if Player.name player = Player.name player1 then
+              if List.length li > 0 then (bo, player1) else (bo, player2)
+            else if List.length li > 0 then (bo, player2)
+            else (bo, player1)
+          else ai_move board player mode
       | Invalid ->
           display_line [ 0; 0; 0; 0 ];
           moveto 275 130;
@@ -155,30 +162,51 @@ let display_valid_move s board player =
       draw_string "This is an illegal move!";
       (board, player)
 
-let rec player_input () board player =
+and ai_move board player mode =
+  let move =
+    if mode = "Easy" then Ai.easy board
+    else if mode = "Medium" then Ai.medium board
+    else Ai.hard board
+  in
+  let ai_parsed = parse move board in
+  moveto 275 250;
+  match ai_parsed with
+  | Legal list_move -> (
+      match State.go board bot list_move with
+      | Valid (bo, li) ->
+          display_line list_move;
+          draw_boxes li bot;
+          draw_string ("Bot move: " ^ int_list_to_string list_move "");
+          if List.length li = 0 || Board.end_game bo then (bo, player1)
+          else ai_move bo bot mode
+      | Invalid ->
+          failwith "impossible, bot will always make a valid move")
+  | Illegal -> failwith "bot will always make a legal move"
+
+let rec player_input () board player mode =
   let event = wait_next_event [ Key_pressed ] in
   match event.key with
   | 'q' -> close_graph ()
-  | '\r' -> command_issued acc board player
-  | key -> char_input acc key board player
+  | '\r' -> command_issued acc board player mode
+  | key -> char_input acc key board player mode
 
-and command_issued acc board player =
+and command_issued acc board player mode =
   (* //convert array into a string pass that string into
      display_valid_move make the array empty player_input()*)
   let a = Array.to_list !acc in
   let str = char_list_to_string a "" in
   set_color white;
   fill_rect 250 100 300 75;
-  let new_setup = display_valid_move str board player in
+  let new_setup = display_valid_move str board player mode in
   acc := [||];
   let brd = fst new_setup in
   let plyr = snd new_setup in
   draw_counters brd;
   display_current_player plyr;
-  if Board.end_game brd then end_game brd plyr
-  else player_input () brd plyr
+  if Board.end_game brd then end_game brd plyr mode
+  else player_input () brd plyr mode
 
-and end_game brd plyr =
+and end_game brd plyr mode =
   set_color white;
   fill_rect 0 0 800 1000;
   set_color black;
@@ -199,15 +227,15 @@ and end_game brd plyr =
       set_color blue;
       draw_string
         (Player.name player2 ^ " score: " ^ string_of_int p2score);
-      player_input () brd plyr
+      player_input () brd plyr mode
 
-and char_input acc key board player =
+and char_input acc key board player mode =
   acc := Array.append !acc [| key |];
   moveto 275 150;
   for i = 0 to Array.length !acc - 1 do
     draw_char (Array.get !acc i)
   done;
-  player_input () board player
+  player_input () board player mode
 
 let board_dimensions = (5, 5)
 
@@ -245,7 +273,7 @@ let draw_board brd_dim win_dim count_dim =
       draw_row_labels (fst brd_dim);
       draw_col_labels (snd brd_dim);
       display_current_player player1;
-      player_input () default_board player1
+      player_input () default_board player1 "Easy"
 
 let open_board =
   draw_board board_dimensions window_dimensions counter_dimensions
