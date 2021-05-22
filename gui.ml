@@ -150,6 +150,7 @@ let rec display_valid_move s board player mode =
               if List.length li > 0 then (bo, player1) else (bo, player2)
             else if List.length li > 0 then (bo, player2)
             else (bo, player1)
+          else if List.length li > 0 then (bo, player1)
           else ai_move board player mode
       | Invalid ->
           display_line [ 0; 0; 0; 0 ];
@@ -169,13 +170,13 @@ and ai_move board player mode =
     else Ai.hard board
   in
   let ai_parsed = parse move board in
-  moveto 275 250;
   match ai_parsed with
   | Legal list_move -> (
       match State.go board bot list_move with
       | Valid (bo, li) ->
           display_line list_move;
           draw_boxes li bot;
+          moveto 200 250;
           draw_string ("Bot move: " ^ int_list_to_string list_move "");
           if List.length li = 0 || Board.end_game bo then (bo, player1)
           else ai_move bo bot mode
@@ -213,20 +214,27 @@ and end_game brd plyr mode =
   moveto 300 550;
   match Board.score brd with
   | p1score, p2score ->
+      let name =
+        if mode = "Mult" then Player.name player2
+        else if mode = "Easy" then "The Easy Bot"
+        else if mode = "Medium" then "The Medium Bot"
+        else "The Hard Bot"
+      in
       if p1score > p2score then
         draw_string
           (Player.name player1 ^ " wins, the game is over! GGWP")
-      else
-        draw_string
-          (Player.name player2 ^ " wins, the game is over! GGWP");
+      else draw_string (name ^ " wins, the game is over! GGWP");
       moveto 300 500;
       set_color red;
       draw_string
         (Player.name player1 ^ " score: " ^ string_of_int p1score);
       moveto 300 450;
       set_color blue;
+      draw_string (name ^ " score: " ^ string_of_int p2score);
+      moveto 300 400;
       draw_string
-        (Player.name player2 ^ " score: " ^ string_of_int p2score);
+        "Press Q to quit out of the game! Thanks for playing. Try all \
+         of the different bot difficulties";
       player_input () brd plyr mode
 
 and char_input acc key board player mode =
@@ -273,7 +281,7 @@ let draw_board brd_dim win_dim count_dim =
       draw_row_labels (fst brd_dim);
       draw_col_labels (snd brd_dim);
       display_current_player player1;
-      player_input () default_board player1 "Easy"
+      player_input () default_board player1 "Mult"
 
 let open_board =
   draw_board board_dimensions window_dimensions counter_dimensions
