@@ -1,8 +1,8 @@
-open Graphics
 open Command
 open Board
 open State
 open Player
+open Graphics
 
 let player1 = create_player "Player 1" "Red"
 

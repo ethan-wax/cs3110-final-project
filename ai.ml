@@ -36,6 +36,11 @@ let easy board =
   valid_moves := [||];
   ai_move
 
-let medium board = failwith "unimplemented"
+let medium board =
+  get_empty_branches board;
+  let rand_index = Random.int (Array.length !valid_moves - 1) in
+  let ai_move = Array.get !valid_moves rand_index in
+  valid_moves := [||];
+  ai_move
 
 let hard board = failwith "unimplemented"

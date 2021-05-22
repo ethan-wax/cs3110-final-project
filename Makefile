@@ -21,18 +21,12 @@ play:
 zip:
 	zip game.zip *.ml* *.json *.sh *.md _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile	
 	
-docs: docs-public docs-private
+docs: docs-public 
 	
 docs-public: build
 	mkdir -p _doc.public
-	ocamlfind ocamldoc -I _build -package ANSITerminal \
+	ocamlfind ocamldoc -I _build -package ANSITerminal -package graphics \
 		-html -stars -d _doc.public $(MLIS)
-
-docs-private: build
-	mkdir -p _doc.private
-	ocamlfind ocamldoc -I _build -package ANSITerminal \
-		-html -stars -d _doc.private \
-		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
 
 clean:
 	ocamlbuild -clean
