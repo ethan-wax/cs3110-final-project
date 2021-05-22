@@ -60,10 +60,10 @@ let make_board size =
     branches_remaining = (rows * (cols - 1)) + ((rows - 1) * cols);
   }
 
-let direction r1 r2 c1 c2 =
-  if c2 - c1 = 1 then Right
-  else if c1 - c2 = 1 then Left
-  else if r2 - r1 = 1 then Down
+let direction x1 x2 y1 y2 =
+  if x2 - x1 = 1 then Right
+  else if x1 - x2 = 1 then Left
+  else if y2 - y1 = 1 then Down
   else Up
 
 let get_branch points board =
@@ -99,9 +99,9 @@ let rec update_board points color board =
   board.last_filled <- [];
   let brd = board.board in
   let point1, point2 = (fst points, snd points) in
-  let r1, c1 = (fst point1, snd point1) in
-  let r2, c2 = (fst point2, snd point2) in
-  let p1_direc = direction r1 r2 c1 c2 in
+  let x1, y1 = (fst point1, snd point1) in
+  let x2, y2 = (fst point2, snd point2) in
+  let p1_direc = direction x1 x2 y1 y2 in
   let p2_direc =
     match p1_direc with
     | Left -> Right
@@ -109,80 +109,80 @@ let rec update_board points color board =
     | Up -> Down
     | Down -> Up
   in
-  let update_point r c = function
-    | Left -> brd.(r).(c) <- { (brd.(r).(c)) with left = Some color }
-    | Right -> brd.(r).(c) <- { (brd.(r).(c)) with right = Some color }
-    | Down -> brd.(r).(c) <- { (brd.(r).(c)) with down = Some color }
-    | Up -> brd.(r).(c) <- { (brd.(r).(c)) with up = Some color }
+  let update_point x y = function
+    | Left -> brd.(x).(y) <- { (brd.(x).(y)) with left = Some color }
+    | Right -> brd.(x).(y) <- { (brd.(x).(y)) with right = Some color }
+    | Down -> brd.(x).(y) <- { (brd.(x).(y)) with down = Some color }
+    | Up -> brd.(x).(y) <- { (brd.(x).(y)) with up = Some color }
   in
-  let check_box r c = function
-    | Right -> check_right r c board color
-    | Left -> check_left r c board color
-    | Up -> check_up r c board color
-    | Down -> check_down r c board color
+  let check_box x y = function
+    | Right -> check_right x y board color
+    | Left -> check_left x y board color
+    | Up -> check_up x y board color
+    | Down -> check_down x y board color
   in
-  update_point r1 c1 p1_direc;
-  update_point r2 c2 p2_direc;
-  check_box r1 c1 p1_direc;
+  update_point x1 y1 p1_direc;
+  update_point x2 y2 p2_direc;
+  check_box x1 y1 p1_direc;
   board.branches_remaining <- board.branches_remaining - 1;
   if board.branches_remaining = 0 then { board with full = true }
   else board
 
-and check_left r c board color =
-  if not (r - 1 < 0) then
+and check_left x y board color =
+  if not (y - 1 < 0) then
     if
-      branch_filled ((r, c), (r + 1, c)) board
-      && branch_filled ((r + 1, c), (r + 1, c - 1)) board
-      && branch_filled ((r + 1, c - 1), (r, c - 1)) board
-    then update_score_and_filled board color (r - 1) (c - 1);
-  if not (r + 1 > snd (dimensions board)) then
+      branch_filled ((x, y), (x, y - 1)) board
+      && branch_filled ((x, y - 1), (x - 1, y - 1)) board
+      && branch_filled ((x - 1, y - 1), (x - 1, y)) board
+    then update_score_and_filled board color (x - 1) (y - 1);
+  if not (y + 1 > snd (dimensions board)) then
     if
-      branch_filled ((r, c), (r + 1, c)) board
-      && branch_filled ((r + 1, c), (r + 1, c - 1)) board
-      && branch_filled ((r + 1, c - 1), (r, c - 1)) board
-    then update_score_and_filled board color r (c - 1)
+      branch_filled ((x, y), (x, y + 1)) board
+      && branch_filled ((x, y + 1), (x - 1, y + 1)) board
+      && branch_filled ((x - 1, y + 1), (x - 1, y)) board
+    then update_score_and_filled board color (x - 1) y
 
-and check_right r c board color =
-  if not (r - 1 < 0) then
+and check_right x y board color =
+  if not (y - 1 < 0) then
     if
-      branch_filled ((r, c), (r - 1, c)) board
-      && branch_filled ((r - 1, c), (r - 1, c + 1)) board
-      && branch_filled ((r - 1, c + 1), (r, c + 1)) board
-    then update_score_and_filled board color (r - 1) c;
-  if not (r + 1 > snd (dimensions board)) then
+      branch_filled ((x, y), (x, y - 1)) board
+      && branch_filled ((x, y - 1), (x + 1, y - 1)) board
+      && branch_filled ((x + 1, y - 1), (x + 1, y)) board
+    then update_score_and_filled board color x (y - 1);
+  if not (y + 1 > snd (dimensions board)) then
     if
-      branch_filled ((r, c), (r + 1, c)) board
-      && branch_filled ((r + 1, c), (r + 1, c + 1)) board
-      && branch_filled ((r + 1, c + 1), (r, c + 1)) board
-    then update_score_and_filled board color r c
+      branch_filled ((x, y), (x, y + 1)) board
+      && branch_filled ((x, y + 1), (x + 1, y + 1)) board
+      && branch_filled ((x + 1, y + 1), (x + 1, y)) board
+    then update_score_and_filled board color x y
 
-and check_up r c board color =
-  if not (c - 1 < 0) then
+and check_up x y board color =
+  if not (x - 1 < 0) then
     if
-      branch_filled ((r, c), (r, c - 1)) board
-      && branch_filled ((r, c - 1), (r - 1, c - 1)) board
-      && branch_filled ((r - 1, c - 1), (r - 1, c)) board
-    then update_score_and_filled board color (r - 1) (c - 1);
-  if not (c + 1 > fst (dimensions board)) then
+      branch_filled ((x, y), (x - 1, y)) board
+      && branch_filled ((x - 1, y), (x - 1, y - 1)) board
+      && branch_filled ((x - 1, y - 1), (x, y - 1)) board
+    then update_score_and_filled board color (x - 1) (y - 1);
+  if not (x + 1 > fst (dimensions board)) then
     if
-      branch_filled ((r, c), (r, c + 1)) board
-      && branch_filled ((r, c + 1), (r - 1, c + 1)) board
-      && branch_filled ((r - 1, c + 1), (r - 1, c)) board
-    then update_score_and_filled board color (r - 1) c
+      branch_filled ((x, y), (x + 1, y)) board
+      && branch_filled ((x + 1, y), (x + 1, y - 1)) board
+      && branch_filled ((x + 1, y - 1), (x, y - 1)) board
+    then update_score_and_filled board color x (y - 1)
 
-and check_down r c board color =
-  if not (c - 1 < 0) then
+and check_down x y board color =
+  if not (x - 1 < 0) then
     if
-      branch_filled ((r, c), (r, c - 1)) board
-      && branch_filled ((r, c - 1), (r + 1, c - 1)) board
-      && branch_filled ((r + 1, c - 1), (r + 1, c)) board
-    then update_score_and_filled board color r (c - 1);
-  if not (c + 1 > fst (dimensions board)) then
+      branch_filled ((x, y), (x - 1, y)) board
+      && branch_filled ((x - 1, y), (x - 1, y + 1)) board
+      && branch_filled ((x - 1, y + 1), (x, y + 1)) board
+    then update_score_and_filled board color (x - 1) y;
+  if not (x + 1 > fst (dimensions board)) then
     if
-      branch_filled ((r, c), (r, c + 1)) board
-      && branch_filled ((r, c + 1), (r + 1, c + 1)) board
-      && branch_filled ((r + 1, c + 1), (r, c + 1)) board
-    then update_score_and_filled board color r c
+      branch_filled ((x, y), (x + 1, y)) board
+      && branch_filled ((x + 1, y), (x + 1, y + 1)) board
+      && branch_filled ((x + 1, y + 1), (x, y + 1)) board
+    then update_score_and_filled board color x y
 
 let last_filled board = board.last_filled
 
