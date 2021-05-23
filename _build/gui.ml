@@ -1,12 +1,22 @@
-open Graphics
 open Command
 open Board
 open State
 open Player
+open Graphics
 
 let player1 = create_player "Player 1" "Red"
 
 let player2 = create_player "Player 2" "Blue"
+
+let instructions =
+  [
+    "To make a move, type in this format: 'r1 c2 r2 c2'";
+    "The indices are zero indexed- the top left corner represents '0 0'";
+    "For example, the move from the top left corner to the dot to the \
+     right of it would be encoded as:";
+    "'0 0 0 1', since you are moving from the 0th row and 0th column \
+     to the 0th row and the 1st column.";
+  ]
 
 let draw_grid location m n =
   match location with
@@ -44,21 +54,24 @@ let draw_box len pos rgb_col =
     (rgb (List.nth rgb_col 0) (List.nth rgb_col 1) (List.nth rgb_col 2));
   fill_rect (List.nth pos 0) (List.nth pos 1) len len
 
-let draw_boxes lst =
+let draw_boxes lst player =
+  let col =
+    if Player.name player = Player.name player1 then [ 255; 0; 0 ]
+    else [ 0; 0; 255 ]
+  in
   if List.length lst = 0 then ()
   else if List.length lst = 1 then
     (* One box filled *)
     match List.hd lst with
-    | r, c ->
-        draw_box 100 [ 150 + (100 * r); 700 - (100 * c) ] [ 255; 0; 0 ]
+    | r, c -> draw_box 100 [ 150 + (100 * r); 700 - (100 * c) ] col
   else
     (* Two boxes filled with one move *)
     let r1 = fst (List.hd lst) in
     let c1 = snd (List.hd lst) in
     let r2 = fst (List.nth lst 1) in
     let c2 = snd (List.nth lst 1) in
-    draw_box 100 [ 150 + (100 * r1); 700 - (100 * c1) ] [ 255; 0; 0 ];
-    draw_box 100 [ 150 + (100 * r2); 700 - (100 * c2) ] [ 255; 0; 0 ]
+    draw_box 100 [ 150 + (100 * r1); 700 - (100 * c1) ] col;
+    draw_box 100 [ 150 + (100 * r2); 700 - (100 * c2) ] col
 
 let draw_counter loc count =
   match loc with
@@ -126,7 +139,7 @@ let display_valid_move s board player =
       match State.go board player move with
       | Valid (bo, li) ->
           display_line move;
-          draw_boxes li;
+          draw_boxes li player;
           moveto 275 130;
           draw_string ("Legal move: " ^ int_list_to_string move "");
           if Player.name player = Player.name player1 then (bo, player2)
@@ -196,26 +209,43 @@ and char_input acc key board player =
   done;
   player_input () board player
 
-let draw_board =
-  let rows = 1 in
-  let cols = 1 in
-  let default_board = make_board (rows, cols) in
-  open_graph "";
-  resize_window 800 1000;
+let board_dimensions = (5, 5)
+
+let window_dimensions = (800, 1000)
+
+let counter_dimensions = (250, 100, 300, 75)
+
+let init_graph pos = open_graph ""
+
+let draw_instructions pos =
+  for i = 0 to List.length instructions - 1 do
+    match pos with
+    | x, y ->
+        moveto x (y - (i * 15));
+        draw_string (List.nth instructions i)
+  done
+
+let draw_board brd_dim win_dim count_dim =
+  let default_board = make_board (fst brd_dim, snd brd_dim) in
+  init_graph (0, 0);
+  resize_window (fst win_dim) (snd win_dim);
   set_window_title "Dots and Boxes";
-  clear_graph ();
   (* Set up Game Title *)
   moveto 350 900;
   set_color black;
   draw_string "Dots and Boxes!";
-  draw_grid (150, 800) rows cols;
+  draw_grid (150, 800) (fst brd_dim) (snd brd_dim);
   set_color black;
   set_line_width 3;
-  draw_rect 250 100 300 75;
-  draw_counters default_board;
-  draw_row_labels 5;
-  draw_col_labels 5;
-  display_current_player player1;
-  player_input () default_board player1
+  draw_instructions (130, 980);
+  match counter_dimensions with
+  | x, y, w, h ->
+      draw_rect x y w h;
+      draw_counters default_board;
+      draw_row_labels (fst brd_dim);
+      draw_col_labels (snd brd_dim);
+      display_current_player player1;
+      player_input () default_board player1
 
-let open_board = draw_board
+let open_board =
+  draw_board board_dimensions window_dimensions counter_dimensions

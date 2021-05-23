@@ -38,3 +38,8 @@ val end_game : t -> bool
 (** [last_filled board] is the boxes that were last filled in the
     previous move if any. *)
 val last_filled : t -> (int * int) list
+
+(** [sides_matrix board] is a matrix representing the filled sides of
+    the board. The entry at [ij] is the number of sides that the box at
+    [ij] has filled on the board. *)
+val sides_matrix : t -> int array array

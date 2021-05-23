@@ -17,6 +17,7 @@ type t = {
   dim : int * int;
   mutable last_filled : (int * int) list;
   mutable branches_remaining : int;
+  sides_matrix : int array array;
 }
 
 type direc =
@@ -58,6 +59,7 @@ let make_board size =
     dim = (rows - 1, cols - 1);
     last_filled = [];
     branches_remaining = (rows * (cols - 1)) + ((rows - 1) * cols);
+    sides_matrix = Array.make_matrix (rows - 1) (cols - 1) 0;
   }
 
 let direction x1 x2 y1 y2 =
@@ -124,6 +126,7 @@ let rec update_board points color board =
   update_point x1 y1 p1_direc;
   update_point x2 y2 p2_direc;
   check_box x1 y1 p1_direc;
+  update_sides_matrix x1 y1 board p1_direc;
   board.branches_remaining <- board.branches_remaining - 1;
   if board.branches_remaining = 0 then { board with full = true }
   else board
@@ -135,7 +138,7 @@ and check_left x y board color =
       && branch_filled ((x, y - 1), (x - 1, y - 1)) board
       && branch_filled ((x - 1, y - 1), (x - 1, y)) board
     then update_score_and_filled board color (x - 1) (y - 1);
-  if not (y + 1 > snd (dimensions board)) then
+  if not (y + 1 > fst (dimensions board)) then
     if
       branch_filled ((x, y), (x, y + 1)) board
       && branch_filled ((x, y + 1), (x - 1, y + 1)) board
@@ -149,7 +152,7 @@ and check_right x y board color =
       && branch_filled ((x, y - 1), (x + 1, y - 1)) board
       && branch_filled ((x + 1, y - 1), (x + 1, y)) board
     then update_score_and_filled board color x (y - 1);
-  if not (y + 1 > snd (dimensions board)) then
+  if not (y + 1 > fst (dimensions board)) then
     if
       branch_filled ((x, y), (x, y + 1)) board
       && branch_filled ((x, y + 1), (x + 1, y + 1)) board
@@ -163,7 +166,7 @@ and check_up x y board color =
       && branch_filled ((x - 1, y), (x - 1, y - 1)) board
       && branch_filled ((x - 1, y - 1), (x, y - 1)) board
     then update_score_and_filled board color (x - 1) (y - 1);
-  if not (x + 1 > fst (dimensions board)) then
+  if not (x + 1 > snd (dimensions board)) then
     if
       branch_filled ((x, y), (x + 1, y)) board
       && branch_filled ((x + 1, y), (x + 1, y - 1)) board
@@ -177,15 +180,49 @@ and check_down x y board color =
       && branch_filled ((x - 1, y), (x - 1, y + 1)) board
       && branch_filled ((x - 1, y + 1), (x, y + 1)) board
     then update_score_and_filled board color (x - 1) y;
-  if not (x + 1 > fst (dimensions board)) then
+  if not (x + 1 > snd (dimensions board)) then
     if
       branch_filled ((x, y), (x + 1, y)) board
       && branch_filled ((x + 1, y), (x + 1, y + 1)) board
       && branch_filled ((x + 1, y + 1), (x, y + 1)) board
     then update_score_and_filled board color x y
 
+and update_sides_matrix x y board = function
+  | Left -> update_left x y board
+  | Right -> update_right x y board
+  | Up -> update_up x y board
+  | Down -> update_down x y board
+
+and update_left x y board =
+  if not (y - 1 < 0) then
+    board.sides_matrix.(x - 1).(y - 1) <-
+      board.sides_matrix.(x - 1).(y - 1) + 1;
+  if not (y + 1 > fst (dimensions board)) then
+    board.sides_matrix.(x - 1).(y) <- board.sides_matrix.(x - 1).(y) + 1
+
+and update_right x y board =
+  if not (y - 1 < 0) then
+    board.sides_matrix.(x).(y - 1) <- board.sides_matrix.(x).(y - 1) + 1;
+  if not (y + 1 > fst (dimensions board)) then
+    board.sides_matrix.(x).(y) <- board.sides_matrix.(x).(y) + 1
+
+and update_up x y board =
+  if not (x - 1 < 0) then
+    board.sides_matrix.(x - 1).(y - 1) <-
+      board.sides_matrix.(x - 1).(y - 1) + 1;
+  if not (x + 1 > snd (dimensions board)) then
+    board.sides_matrix.(x).(y - 1) <- board.sides_matrix.(x).(y - 1) + 1
+
+and update_down x y board =
+  if not (x - 1 < 0) then
+    board.sides_matrix.(x - 1).(y) <- board.sides_matrix.(x - 1).(y) + 1;
+  if not (x + 1 > snd (dimensions board)) then
+    board.sides_matrix.(x).(y) <- board.sides_matrix.(x).(y) + 1
+
 let last_filled board = board.last_filled
 
 let score board = board.score
 
 let end_game board = board.full
+
+let sides_matrix board = board.sides_matrix

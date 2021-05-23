@@ -73,7 +73,7 @@ let big_board_with_two_boxes =
           ((4, 4), (4, 3))
           Blue
           (update_board
-             ((3, 3), (4, 3))
+             ((4, 3), (3, 3))
              Red
              (update_board
                 ((0, 1), (0, 0))
@@ -136,6 +136,17 @@ let end_game_test
   name >:: fun _ ->
   assert_equal expected_output (end_game board) ~printer:string_of_bool
 
+let sides_matrix_test
+    (name : string)
+    (board : Board.t)
+    (x : int)
+    (y : int)
+    (expected_output : int) : test =
+  name >:: fun _ ->
+  assert_equal expected_output
+    (sides_matrix board).(x).(y)
+    ~printer:string_of_int
+
 let player_tests =
   [
     player_name_test "Get Player 1 name" default_player "Player 1";
@@ -144,13 +155,15 @@ let player_tests =
     player_color_test "Get Player 2 color" second_player "Blue";
   ]
 
-let board_tests =
+let dimensions_tests =
   [
-    (* Testing Board.dimensions *)
     dimension_test "default board" default_board (4, 5);
     dimension_test "square" square_board (6, 6);
     dimension_test "one-by-one" one_by_one (1, 1);
-    (* Testing Board.get_branch *)
+  ]
+
+let board_tests =
+  [
     get_branch_test "default board has no branch (0,0) -> (1,0)"
       ((0, 0), (1, 0))
       default_board Blank;
@@ -224,14 +237,44 @@ let board_tests =
     get_branch_test "bbwtb has no branch (4,3) -> (5,3)"
       ((4, 3), (5, 3))
       big_board_with_two_boxes Blank;
-    (* Testing Board.score *)
+  ]
+
+let score_tests =
+  [
     score_test "default board has score (0,0)" default_board (0, 0);
     score_test "board with box has score (0,1)" board_with_box (0, 1);
-    (* Testing Board.end_game *)
+  ]
+
+let end_game_tests =
+  [
     end_game_test "default board has not reached end game" default_board
       false;
     end_game_test "board with box has reached end game" board_with_box
       true;
+  ]
+
+let side_matrix_tests =
+  [
+    sides_matrix_test "board is initialized with sides matrix vals of 0"
+      default_board 0 0 0;
+    sides_matrix_test
+      "board_with_move should have value of 1 under the move"
+      board_with_move 0 0 1;
+    sides_matrix_test
+      "board_with_move should have value of 0 away from the move"
+      board_with_move 3 3 0;
+    sides_matrix_test
+      "board_with_two_boxes should have value of 1 at box (3,4)"
+      big_board_with_two_boxes 3 4 1;
+    sides_matrix_test
+      "board_with_two_boxes should have value of 1 at box (4,3)"
+      big_board_with_two_boxes 4 3 1;
+    sides_matrix_test
+      "board_with_two_boxes should have value of 1 at box (2,3)"
+      big_board_with_two_boxes 2 3 1;
+    sides_matrix_test
+      "board_with_two_boxes should have value of 4 at box (3,3)"
+      big_board_with_two_boxes 3 3 4;
   ]
 
 let command_tests =
@@ -284,6 +327,15 @@ let command_tests =
 
 let suite =
   "test suite for final project"
-  >::: List.flatten [ player_tests; board_tests; command_tests ]
+  >::: List.flatten
+         [
+           player_tests;
+           board_tests;
+           command_tests;
+           dimensions_tests;
+           end_game_tests;
+           score_tests;
+           side_matrix_tests;
+         ]
 
 let _ = run_test_tt_main suite
