@@ -1,8 +1,18 @@
+(** Test plan: The test plan should be located in a comment at the top
+    of the test file. -4: The test plan is missing. -1: The test plan
+    does not explain which parts of the system were automatically tested
+    by OUnit vs. manually tested. -1: The test plan does not explain
+    what modules were tested by OUnit and how test cases were developed
+    (black box, glass box, randomized, etc.). -1: The test plan does not
+    provide an argument for why the testing approach demonstrates the
+    correctness of the system. *)
+
 open OUnit2
 open Board
 open Command
 open Player
 open State
+open Ai
 
 let color_printer = function
   | Red -> "Red"
@@ -325,6 +335,76 @@ let command_tests =
       Illegal;
   ]
 
+let list_to_tuple lst =
+  match lst with
+  | [ x; y; z; d ] -> ((x, y), (z, d))
+  | _ -> failwith "unimp"
+
+let on_edge board move =
+  let move_point_lst = String.split_on_char ' ' move in
+  let move_filtered_lst =
+    List.filter (fun a -> a <> "") move_point_lst
+  in
+  let tuple_move = list_to_tuple move_filtered_lst in
+  (* If the move is on the edge/corner then add it to edge array else go
+     to next element in array *)
+  if
+    (* Checking left, right, top, bottom sides *)
+    let r1 = int_of_string (fst (fst tuple_move)) in
+    let c1 = int_of_string (snd (fst tuple_move)) in
+    let r2 = int_of_string (fst (snd tuple_move)) in
+    let c2 = int_of_string (snd (snd tuple_move)) in
+    let board_r = fst (Board.dimensions board) in
+    let board_c = fst (Board.dimensions board) in
+    (c1 = 0 && c2 = 0)
+    || (c1 = board_c && c2 = board_c)
+    || (r1 = 0 && r2 = 0)
+    || (r1 = board_r && r2 = board_r)
+  then true
+  else false
+
+let medium_bot_test
+    (name : string)
+    (board : Board.t)
+    (expected_output : bool) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (on_edge board (Ai.medium board))
+
+let board_with_no_edge_moves =
+  update_board
+    ((2, 1), (2, 2))
+    Blue
+    (update_board
+       ((2, 0), (2, 1))
+       Red
+       (update_board
+          ((0, 1), (0, 2))
+          Blue
+          (update_board
+             ((0, 0), (0, 1))
+             Red
+             (update_board
+                ((1, 2), (2, 2))
+                Blue
+                (update_board
+                   ((0, 2), (1, 2))
+                   Red
+                   (update_board
+                      ((1, 0), (2, 0))
+                      Blue
+                      (update_board
+                         ((0, 0), (1, 0))
+                         Red
+                         (make_board (2, 2)))))))))
+
+let ai_tests =
+  [
+    medium_bot_test "blank board, move should be on the edge"
+      default_board true;
+    medium_bot_test "board with no edge moves available"
+      board_with_no_edge_moves false;
+  ]
+
 let suite =
   "test suite for final project"
   >::: List.flatten
@@ -336,6 +416,7 @@ let suite =
            end_game_tests;
            score_tests;
            side_matrix_tests;
+           ai_tests;
          ]
 
 let _ = run_test_tt_main suite
