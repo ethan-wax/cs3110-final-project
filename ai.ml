@@ -17,6 +17,43 @@ let get_empty_branch r1 c1 r2 c2 board =
           valid_moves := Array.append !valid_moves [| string_move |])
   | Illegal -> ()
 
+let empty_sides r c board =
+  let top =
+    string_of_int r ^ " " ^ string_of_int c ^ " " ^ string_of_int r
+    ^ " "
+    ^ string_of_int (c + 1)
+  in
+  let bottom =
+    string_of_int (r + 1)
+    ^ " " ^ string_of_int c ^ " "
+    ^ string_of_int (r + 1)
+    ^ " "
+    ^ string_of_int (c + 1)
+  in
+  let right =
+    string_of_int r ^ " "
+    ^ string_of_int (c + 1)
+    ^ " "
+    ^ string_of_int (r + 1)
+    ^ " "
+    ^ string_of_int (c + 1)
+  in
+  let left =
+    string_of_int r ^ " " ^ string_of_int c ^ " "
+    ^ string_of_int (r + 1)
+    ^ " " ^ string_of_int c
+  in
+  let sides = sides_matrix board in
+  let lst = ref [] in
+  if not (branch_filled ((r, c), (r, c + 1)) board) then
+    lst := top :: !lst
+  else if branch_filled ((r, c), (r + 1, c)) board then
+    lst := left :: !lst
+  else if branch_filled ((r + 1, c), (r + 1, c + 1)) board then
+    lst := bottom :: !lst
+  else lst := right :: !lst;
+  !lst
+
 let get_empty_branches board =
   let dim = Board.dimensions board in
   for r1 = 0 to fst dim do
@@ -88,4 +125,20 @@ let medium board =
     valid_moves := [||];
     ai_move
 
-let hard board = failwith "unimplemented"
+let rec find_index lst f i =
+  match lst with
+  | [] -> failwith "Something went wrong"
+  | h :: t -> if f h then i else find_index t f (i + 1)
+
+let hard board =
+  get_empty_branches board;
+  let sides = sides_matrix board in
+  if Array.exists (fun x -> Array.exists (fun y -> y = 3) x) sides then
+    let arr_list = Array.to_list sides in
+    let row =
+      List.find (fun x -> Array.exists (fun y -> y = 3) x) arr_list
+    in
+    let row_index = find_index arr_list (fun x -> x = row) 0 in
+    let col_index = find_index (Array.to_list row) (fun x -> x = 3) 0 in
+    failwith "todo"
+  else failwith "todo"
