@@ -184,7 +184,7 @@ let find_box_not_finish sides_matrix_board board =
       if Array.get (Array.get sides_matrix_board row) col = 2 then
         bad_moves :=
           Array.append !bad_moves
-            [| List.hd (empty_sides row col board) |]
+            (Array.of_list (empty_sides row col board))
       else ()
     done
   done

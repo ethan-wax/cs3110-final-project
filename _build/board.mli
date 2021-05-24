@@ -1,6 +1,8 @@
+(** The abstract type of values representing the board.  *)
 (** The abstract type of a board. *)
 type t
 
+(** Move corresponding to player's color. Blank represents no move made.  *)
 type color =
   | Blank
   | Red

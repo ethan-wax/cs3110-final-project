@@ -38,14 +38,14 @@ let display_endgame board mode =
         if p1score > p2score then
           print_string
             ("\n" ^ "------------------------------\n" ^ p1name
-           ^ " wins, the simulation is over! Bots rein supreme.\n"
+           ^ " wins, the simulation is over! Bots reign supreme.\n"
            ^ p1name ^ " score: " ^ string_of_int p1score ^ "\n" ^ p2name
            ^ " score: " ^ string_of_int p2score ^ "\n"
            ^ "------------------------------\n")
         else
           print_string
             ("\n" ^ "------------------------------\n" ^ p2name
-           ^ " wins, the simulation is over! Bots rein supreme.\n"
+           ^ " wins, the simulation is over! Bots reign supreme.\n"
            ^ p1name ^ " score: " ^ string_of_int p1score ^ "\n" ^ p2name
            ^ " score: " ^ string_of_int p2score ^ "\n"
            ^ "------------------------------\n")
