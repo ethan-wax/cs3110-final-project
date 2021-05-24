@@ -188,56 +188,63 @@ let find_box_not_finish sides_matrix_board board =
     done
   done
 
+let debug = false
+
 let hard board =
-  Random.self_init ();
-  let sides_matrix_board = sides_matrix board in
-  (* Searches sides_matrix for points which have 3 sides completed, if 3
-     sides are completed, then the available move corresponding to the
-     point is found. This move is added to complete_box_moves array. *)
-  find_box_finish sides_matrix_board board;
-  (* Searches sides_matrix for boxes which have 2 sides completed to
-     avoid creating a new box for the player to close. If there are 2
-     sides are completed, then the available move corresponding to the
-     point is found. This move is added to bad_moves array.*)
-  find_box_not_finish sides_matrix_board board;
-  get_empty_branches board;
-  get_edges board;
-  if Array.length !complete_box_moves > 0 then (
-    let rand_index = Random.int (Array.length !complete_box_moves) in
-    let ai_move = Array.get !complete_box_moves rand_index in
-    bad_moves := [||];
-    valid_moves := [||];
-    edge_moves := [||];
-    ai_move)
+  if debug then medium board
   else
-    let moves = Array.to_list !valid_moves in
-    let good_moves =
-      List.filter
-        (fun x -> Array.exists (fun y -> y <> x) !bad_moves)
-        moves
-    in
-    let best_moves =
-      List.filter
-        (fun x -> Array.exists (fun y -> y = x) !edge_moves)
-        good_moves
-    in
-    if List.length best_moves > 0 then (
-      let rand_index = Random.int (List.length best_moves) in
-      let ai_move = List.nth best_moves rand_index in
+    let _ = () in
+    Random.self_init ();
+    let sides_matrix_board = sides_matrix board in
+    (* Searches sides_matrix for points which have 3 sides completed, if
+       3 sides are completed, then the available move corresponding to
+       the point is found. This move is added to complete_box_moves
+       array. *)
+    find_box_finish sides_matrix_board board;
+    (* Searches sides_matrix for boxes which have 2 sides completed to
+       avoid creating a new box for the player to close. If there are 2
+       sides are completed, then the available move corresponding to the
+       point is found. This move is added to bad_moves array.*)
+    find_box_not_finish sides_matrix_board board;
+    get_empty_branches board;
+    get_edges board;
+    if Array.length !complete_box_moves > 0 then (
+      let rand_index = Random.int (Array.length !complete_box_moves) in
+      let ai_move = Array.get !complete_box_moves rand_index in
       bad_moves := [||];
-      valid_moves := [||];
-      edge_moves := [||];
-      ai_move)
-    else if List.length good_moves > 0 then (
-      let rand_index = Random.int (List.length good_moves) in
-      let ai_move = List.nth good_moves rand_index in
-      bad_moves := [||];
+      complete_box_moves := [||];
       valid_moves := [||];
       edge_moves := [||];
       ai_move)
     else
-      let _ = () in
-      bad_moves := [||];
-      valid_moves := [||];
-      edge_moves := [||];
-      easy board
+      let moves = Array.to_list !valid_moves in
+      let good_moves =
+        List.filter
+          (fun x -> Array.exists (fun y -> y <> x) !bad_moves)
+          moves
+      in
+      let best_moves =
+        List.filter
+          (fun x -> Array.exists (fun y -> y = x) !edge_moves)
+          good_moves
+      in
+      if List.length best_moves > 0 then (
+        let rand_index = Random.int (List.length best_moves) in
+        let ai_move = List.nth best_moves rand_index in
+        bad_moves := [||];
+        valid_moves := [||];
+        edge_moves := [||];
+        ai_move)
+      else if List.length good_moves > 0 then (
+        let rand_index = Random.int (List.length good_moves) in
+        let ai_move = List.nth good_moves rand_index in
+        bad_moves := [||];
+        valid_moves := [||];
+        edge_moves := [||];
+        ai_move)
+      else
+        let _ = () in
+        bad_moves := [||];
+        valid_moves := [||];
+        edge_moves := [||];
+        easy board
