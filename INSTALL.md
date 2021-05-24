@@ -30,7 +30,7 @@ Play game in GUI:
   ```
 
 - To play against AI: 
-  - At the bottom of gui.ml change the string input in open_board so it is the AI difficulty you want. Ex: 
+  - At the bottom of gui.ml change the string input in draw_board so it is the AI difficulty you want. Ex: 
   ```
   else player_input () default_board player1 "Easy"
   ```
