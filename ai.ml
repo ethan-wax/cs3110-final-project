@@ -43,18 +43,16 @@ let empty_sides r c board =
     ^ string_of_int (r + 1)
     ^ " " ^ string_of_int c
   in
-  let sides = sides_matrix board in
   let lst = ref [] in
   (* Note: Does this check left if top is empty???????? *)
   if not (branch_filled ((r, c), (r, c + 1)) board) then
-    lst := top :: !lst
-  else if not (branch_filled ((r, c), (r + 1, c)) board) then
-    lst := left :: !lst
-  else if not (branch_filled ((r + 1, c), (r + 1, c + 1)) board) then
-    lst := bottom :: !lst
-  else if not (branch_filled ((r, c + 1), (r + 1, c + 1)) board) then
-    lst := right :: !lst
-  else ();
+    lst := top :: !lst;
+  if not (branch_filled ((r, c), (r + 1, c)) board) then
+    lst := left :: !lst;
+  if not (branch_filled ((r + 1, c), (r + 1, c + 1)) board) then
+    lst := bottom :: !lst;
+  if not (branch_filled ((r, c + 1), (r + 1, c + 1)) board) then
+    lst := right :: !lst;
   !lst
 
 let get_empty_branches board =
@@ -86,12 +84,10 @@ let edge_moves = ref [||]
 
 let complete_box_moves = ref [||]
 
-let medium board =
-  Random.self_init ();
-  let sides_matrix_board = sides_matrix board in
-  (* Searches sides_matrix for points which have 3 sides completed, if 3
-     sides are completed, then the available move corresponding to the
-     point is found. This move is added to complete_box_moves array. *)
+(* Searches sides_matrix for points which have 3 sides completed, if 3
+   sides are completed, then the available move corresponding to the
+   point is found. This move is added to complete_box_moves array. *)
+let find_box_finish sides_matrix_board board =
   for row = 0 to Array.length sides_matrix_board - 1 do
     for col = 0 to Array.length (Array.get sides_matrix_board 0) - 1 do
       if Array.get (Array.get sides_matrix_board row) col = 3 then
@@ -100,7 +96,12 @@ let medium board =
             [| List.hd (empty_sides row col board) |]
       else ()
     done
-  done;
+  done
+
+let medium board =
+  Random.self_init ();
+  let sides_matrix_board = sides_matrix board in
+  find_box_finish sides_matrix_board board;
   (* let sides_matrix_board = sides_matrix board in if Array.get
      (Array.get sides_matrix_board 0) 0 = 3 then complete_box_moves :=
      Array.append !complete_box_moves [| "0 1 1 1" |] else (); *)
@@ -156,20 +157,44 @@ let medium board =
     valid_moves := [||];
     ai_move
 
-let rec find_index lst f i =
-  match lst with
-  | [] -> failwith "Something went wrong"
-  | h :: t -> if f h then i else find_index t f (i + 1)
+let non_box_moves = ref [||]
+
+let find_box_not_finish sides_matrix_board board =
+  for row = 0 to Array.length sides_matrix_board - 1 do
+    for col = 0 to Array.length (Array.get sides_matrix_board 0) - 1 do
+      if
+        Array.get (Array.get sides_matrix_board row) col = 0
+        || Array.get (Array.get sides_matrix_board row) col = 1
+      then
+        non_box_moves :=
+          Array.append !non_box_moves
+            [| List.hd (empty_sides row col board) |]
+      else ()
+    done
+  done
 
 let hard board =
-  get_empty_branches board;
-  let sides = sides_matrix board in
-  if Array.exists (fun x -> Array.exists (fun y -> y = 3) x) sides then
-    let arr_list = Array.to_list sides in
-    let row =
-      List.find (fun x -> Array.exists (fun y -> y = 3) x) arr_list
-    in
-    let row_index = find_index arr_list (fun x -> x = row) 0 in
-    let col_index = find_index (Array.to_list row) (fun x -> x = 3) 0 in
-    failwith "todo"
-  else failwith "todo"
+  Random.self_init ();
+  let sides_matrix_board = sides_matrix board in
+  (* Searches sides_matrix for points which have 3 sides completed, if 3
+     sides are completed, then the available move corresponding to the
+     point is found. This move is added to complete_box_moves array. *)
+  find_box_finish sides_matrix_board board;
+  (* Searches sides_matrix for points which don't have 2 sides completed
+     to avoid creating a new box for the player to close. If there are 1
+     or 2 sides are completed, then the available move corresponding to
+     the point is found. This move is added to complete_box_moves array.*)
+  find_box_not_finish sides_matrix_board board;
+  if Array.length !complete_box_moves > 0 then (
+    let rand_index = Random.int (Array.length !complete_box_moves) in
+    let ai_move = Array.get !complete_box_moves rand_index in
+    complete_box_moves := [||];
+    ai_move)
+  else if Array.length !non_box_moves > 0 then (
+    let rand_index = Random.int (Array.length !non_box_moves) in
+    let ai_move = Array.get !non_box_moves rand_index in
+    non_box_moves := [||];
+    ai_move
+    (* If no moves are found that satisfy the above criteria, simply
+       return a random move.*))
+  else easy board

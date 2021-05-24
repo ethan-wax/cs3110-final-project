@@ -3,10 +3,13 @@ open Board
 open State
 open Player
 open Graphics
+open Ai
 
 let player1 = create_player "Player 1" "Red"
 
 let player2 = create_player "Player 2" "Blue"
+
+let bot = create_player "Bot" "Blue"
 
 let instructions =
   [
@@ -43,11 +46,13 @@ let draw_col_labels cols =
     draw_string (string_of_int i)
   done
 
-let draw_move coordinates =
-  set_color (rgb 120 120 120);
-  set_line_width 12;
-  moveto (List.nth coordinates 0) (List.nth coordinates 1);
-  lineto (List.nth coordinates 2) (List.nth coordinates 3)
+let draw_move coordinates color =
+  match color with
+  | r, g, b ->
+      set_color (rgb r g b);
+      set_line_width 12;
+      moveto (List.nth coordinates 0) (List.nth coordinates 1);
+      lineto (List.nth coordinates 2) (List.nth coordinates 3)
 
 let draw_box len pos rgb_col =
   set_color
@@ -63,15 +68,15 @@ let draw_boxes lst player =
   else if List.length lst = 1 then
     (* One box filled *)
     match List.hd lst with
-    | r, c -> draw_box 100 [ 150 + (100 * r); 700 - (100 * c) ] col
+    | r, c -> draw_box 100 [ 150 + (100 * c); 700 - (100 * r) ] col
   else
     (* Two boxes filled with one move *)
     let r1 = fst (List.hd lst) in
     let c1 = snd (List.hd lst) in
     let r2 = fst (List.nth lst 1) in
     let c2 = snd (List.nth lst 1) in
-    draw_box 100 [ 150 + (100 * r1); 700 - (100 * c1) ] col;
-    draw_box 100 [ 150 + (100 * r2); 700 - (100 * c2) ] col
+    draw_box 100 [ 150 + (100 * c1); 700 - (100 * r1) ] col;
+    draw_box 100 [ 150 + (100 * c2); 700 - (100 * r2) ] col
 
 let draw_counter loc count =
   match loc with
@@ -110,14 +115,14 @@ let rec char_list_to_string lst s =
 
 let acc = ref [||]
 
-let display_line move =
+let display_line move color =
   match move with
   | [ r1; c1; r2; c2 ] ->
       let x1 = 150 + (100 * c1) in
       let y1 = 800 - (100 * r1) in
       let x2 = 150 + (100 * c2) in
       let y2 = 800 - (100 * r2) in
-      draw_move [ x1; y1; x2; y2 ]
+      draw_move [ x1; y1; x2; y2 ] color
   | _ -> failwith "Precondition violated"
 
 let display_current_player player =
@@ -131,83 +136,117 @@ let display_current_player player =
    char array into a string (command_issued) - Goes into
    display_valid_move (parse) - display_valid_move is unit displaying on
    board - Then call player input (mutually recursive) *)
-let display_valid_move s board player =
+let rec display_valid_move s board player mode =
   let parsed = parse s board in
   moveto 275 250;
   match parsed with
   | Legal move -> (
       match State.go board player move with
       | Valid (bo, li) ->
-          display_line move;
+          display_line move (120, 120, 120);
           draw_boxes li player;
           moveto 275 130;
           draw_string ("Legal move: " ^ int_list_to_string move "");
-          if Player.name player = Player.name player1 then (bo, player2)
-          else (bo, player1)
+          if mode = "Mult" then
+            if Player.name player = Player.name player1 then
+              if List.length li > 0 then (bo, player1) else (bo, player2)
+            else if List.length li > 0 then (bo, player2)
+            else (bo, player1)
+          else if List.length li > 0 then (bo, player1)
+          else ai_move board player mode
       | Invalid ->
-          display_line [ 0; 0; 0; 0 ];
+          display_line [ 0; 0; 0; 0 ] (120, 120, 120);
           moveto 275 130;
           draw_string "This move has already been done!";
           (board, player))
   | Illegal ->
-      display_line [ 0; 0; 0; 0 ];
+      display_line [ 0; 0; 0; 0 ] (120, 120, 120);
       moveto 275 130;
       draw_string "This is an illegal move!";
       (board, player)
 
-let rec player_input () board player =
+and ai_move board player mode =
+  Unix.sleep 1;
+  let move =
+    if mode = "Easy" then Ai.easy board
+    else if mode = "Medium" then Ai.medium board
+    else Ai.hard board
+  in
+  let ai_parsed = parse move board in
+  match ai_parsed with
+  | Legal list_move -> (
+      match State.go board bot list_move with
+      | Valid (bo, li) ->
+          display_line list_move (0, 145, 0);
+          draw_boxes li bot;
+          moveto 200 250;
+          draw_string ("Bot move: " ^ int_list_to_string list_move "");
+          if List.length li = 0 || Board.end_game bo then (bo, player1)
+          else ai_move bo bot mode
+      | Invalid ->
+          failwith "impossible, bot will always make a valid move")
+  | Illegal -> failwith "bot will always make a legal move"
+
+let rec player_input () board player mode =
   let event = wait_next_event [ Key_pressed ] in
   match event.key with
   | 'q' -> close_graph ()
-  | '\r' -> command_issued acc board player
-  | key -> char_input acc key board player
+  | '\r' -> command_issued acc board player mode
+  | key -> char_input acc key board player mode
 
-and command_issued acc board player =
+and command_issued acc board player mode =
   (* //convert array into a string pass that string into
      display_valid_move make the array empty player_input()*)
   let a = Array.to_list !acc in
   let str = char_list_to_string a "" in
   set_color white;
   fill_rect 250 100 300 75;
-  let new_setup = display_valid_move str board player in
+  let new_setup = display_valid_move str board player mode in
   acc := [||];
   let brd = fst new_setup in
   let plyr = snd new_setup in
   draw_counters brd;
   display_current_player plyr;
-  if Board.end_game brd then end_game brd plyr
-  else player_input () brd plyr
+  if Board.end_game brd then end_game brd plyr mode
+  else player_input () brd plyr mode
 
-and end_game brd plyr =
+and end_game brd plyr mode =
   set_color white;
   fill_rect 0 0 800 1000;
   set_color black;
   moveto 300 550;
   match Board.score brd with
   | p1score, p2score ->
+      let name =
+        if mode = "Mult" then Player.name player2
+        else if mode = "Easy" then "The Easy Bot"
+        else if mode = "Medium" then "The Medium Bot"
+        else "The Hard Bot"
+      in
       if p1score > p2score then
         draw_string
           (Player.name player1 ^ " wins, the game is over! GGWP")
-      else
-        draw_string
-          (Player.name player2 ^ " wins, the game is over! GGWP");
+      else draw_string (name ^ " wins, the game is over! GGWP");
       moveto 300 500;
       set_color red;
       draw_string
         (Player.name player1 ^ " score: " ^ string_of_int p1score);
       moveto 300 450;
       set_color blue;
+      draw_string (name ^ " score: " ^ string_of_int p2score);
+      moveto 300 400;
       draw_string
-        (Player.name player2 ^ " score: " ^ string_of_int p2score);
-      player_input () brd plyr
+        "Press Q to quit out of the game! Thanks for playing. Try all \
+         of the different bot difficulties";
+      player_input () brd plyr mode
 
-and char_input acc key board player =
+and char_input acc key board player mode =
   acc := Array.append !acc [| key |];
   moveto 275 150;
   for i = 0 to Array.length !acc - 1 do
     draw_char (Array.get !acc i)
   done;
-  player_input () board player
+  player_input () board player mode
 
 let board_dimensions = (5, 5)
 
@@ -238,14 +277,14 @@ let draw_board brd_dim win_dim count_dim =
   set_color black;
   set_line_width 3;
   draw_instructions (130, 980);
-  match counter_dimensions with
+  match count_dim with
   | x, y, w, h ->
       draw_rect x y w h;
       draw_counters default_board;
       draw_row_labels (fst brd_dim);
       draw_col_labels (snd brd_dim);
       display_current_player player1;
-      player_input () default_board player1
+      player_input () default_board player1 "Medium"
 
 let open_board =
   draw_board board_dimensions window_dimensions counter_dimensions
