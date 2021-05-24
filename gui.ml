@@ -15,6 +15,14 @@ let bot1 = create_player "Bot 1" "Red"
 
 let bot2 = create_player "Bot 2" "Blue"
 
+let line_color_red = [ 238; 128; 128 ]
+
+let line_color_blue = [ 72; 178; 231 ]
+
+let box_color_red = [ 240; 89; 70 ]
+
+let box_color_blue = [ 24; 126; 223 ]
+
 let instructions =
   [
     "To make a move, type in this format: 'r1 c2 r2 c2'";
@@ -65,22 +73,25 @@ let draw_box len pos rgb_col =
 
 let draw_boxes lst player =
   let col =
-    if Player.name player = Player.name player1 then [ 255; 0; 0 ]
-    else [ 0; 0; 255 ]
+    if
+      Player.name player = Player.name player1
+      || Player.name player = Player.name bot1
+    then box_color_red
+    else box_color_blue
   in
   if List.length lst = 0 then ()
   else if List.length lst = 1 then
     (* One box filled *)
     match List.hd lst with
-    | r, c -> draw_box 100 [ 150 + (100 * c); 700 - (100 * r) ] col
+    | r, c -> draw_box 90 [ 155 + (100 * c); 705 - (100 * r) ] col
   else
     (* Two boxes filled with one move *)
     let r1 = fst (List.hd lst) in
     let c1 = snd (List.hd lst) in
     let r2 = fst (List.nth lst 1) in
     let c2 = snd (List.nth lst 1) in
-    draw_box 100 [ 150 + (100 * c1); 700 - (100 * r1) ] col;
-    draw_box 100 [ 150 + (100 * c2); 700 - (100 * r2) ] col
+    draw_box 90 [ 155 + (100 * c1); 705 - (100 * r1) ] col;
+    draw_box 90 [ 155 + (100 * c2); 705 - (100 * r2) ] col
 
 let draw_counter loc count =
   match loc with
@@ -93,11 +104,11 @@ let draw_counter loc count =
 
 let draw_counters board =
   moveto 50 50;
-  set_color red;
+  set_color (rgb 240 89 70);
   draw_string "Red: ";
   (* Set up counter label Blue *)
   moveto 700 50;
-  set_color blue;
+  set_color (rgb 24 126 223);
   draw_string "Blue: ";
   let scores = Board.score board in
   match scores with
@@ -147,7 +158,18 @@ let rec display_valid_move s board player mode =
   | Legal move -> (
       match State.go board player move with
       | Valid (bo, li) ->
-          display_line move (120, 120, 120);
+          let color =
+            if Player.name player = Player.name player1 then
+              (* (238, 128, 128) *)
+              ( List.nth line_color_red 0,
+                List.nth line_color_red 1,
+                List.nth line_color_red 2 )
+            else
+              ( List.nth line_color_blue 0,
+                List.nth line_color_blue 1,
+                List.nth line_color_blue 2 )
+          in
+          display_line move color;
           draw_boxes li player;
           moveto 275 130;
           draw_string ("Legal move: " ^ int_list_to_string move "");
@@ -181,9 +203,15 @@ and ai_move board player mode =
   | Legal list_move -> (
       match State.go board bot list_move with
       | Valid (bo, li) ->
-          display_line list_move (0, 145, 0);
+          display_line list_move
+            ( List.nth line_color_blue 0,
+              List.nth line_color_blue 1,
+              List.nth line_color_blue 2 );
           draw_boxes li bot;
-          moveto 200 250;
+          moveto 275 225;
+          set_color white;
+          fill_rect 275 225 120 20;
+          set_color (rgb 0 0 0);
           draw_string ("Bot move: " ^ int_list_to_string list_move "");
           if List.length li = 0 || Board.end_game bo then (bo, player1)
           else ai_move bo bot mode
@@ -280,13 +308,21 @@ and simulation_move board bot_diff bot2_diff current_bot =
     | Legal list_bot_move -> (
         match State.go board current_bot list_bot_move with
         | Valid (bo, li) ->
-            let col =
+            let color =
               if Player.name current_bot = Player.name bot1 then
-                (0, 145, 0)
-              else (0, 235, 0)
+                (* (238, 128, 128) *)
+                ( List.nth line_color_red 0,
+                  List.nth line_color_red 1,
+                  List.nth line_color_red 2 )
+              else
+                ( List.nth line_color_blue 0,
+                  List.nth line_color_blue 1,
+                  List.nth line_color_blue 2 )
             in
-            display_line list_bot_move col;
+            display_line list_bot_move color;
             draw_boxes li current_bot;
+            draw_counters bo;
+            display_current_player current_bot;
             if List.length li = 0 || Board.end_game bo then
               if Player.name current_bot = Player.name bot1 then
                 loop_simulation bo bot_diff bot2_diff bot2
@@ -333,7 +369,7 @@ let draw_board brd_dim win_dim count_dim mode =
       draw_col_labels (snd brd_dim);
       display_current_player player1;
       if mode = "Simulation" then
-        loop_simulation default_board "Medium" "Easy" bot1
+        loop_simulation default_board "Medium" "Medium" bot1
       else player_input () default_board player1 "Medium"
 
 let open_board =
