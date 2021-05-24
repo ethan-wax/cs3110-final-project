@@ -281,7 +281,7 @@ let draw_board brd_dim win_dim count_dim =
       draw_row_labels (fst brd_dim);
       draw_col_labels (snd brd_dim);
       display_current_player player1;
-      player_input () default_board player1 "Mult"
+      player_input () default_board player1 "Medium"
 
 let open_board =
   draw_board board_dimensions window_dimensions counter_dimensions
