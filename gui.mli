@@ -1,7 +1,7 @@
 open Player
 
-(** open_board opens the graph for the user and defines the background
-    color and initial dimensions. *)
+(** open_board mode opens the graph for the user and defines the
+    background color and initial dimensions. *)
 val open_board : unit
 
 (** Draws the text per red or blue player *)
@@ -54,7 +54,9 @@ val player_input : unit -> Board.t -> Player.t -> string -> unit
     instructions on the board *)
 val draw_instructions : int * int -> unit
 
-(** [draw_board brd_dim win_dim count_dim] draws the board based on
-    board dimensions, window dimensions, and count dimensions. Displays
+(** [draw_board brd_dim win_dim count_dim mode] draws the board based on
+    board dimensions, window dimensions, and count dimensions. mode
+    specifies if this is a simluation or involves player input. Displays
     grid, labels, counters, players, instructions, and moves. *)
-val draw_board : int * int -> int * int -> int * int * int * int -> unit
+val draw_board :
+  int * int -> int * int -> int * int * int * int -> string -> unit

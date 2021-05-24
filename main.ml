@@ -146,25 +146,29 @@ and proper_move board bot_diff bot2_diff current_bot =
   move
 
 and simulation_move board bot_diff bot2_diff current_bot =
-  Unix.sleep 1;
-  let bot_move = proper_move board bot_diff bot2_diff current_bot in
-  ANSITerminal.print_string [ ANSITerminal.red ]
-    ("\nBot move: " ^ bot_move ^ "\n");
-  match Command.parse bot_move board with
-  | Legal t -> (
-      match State.go board current_bot t with
-      | Valid (bo, li) ->
-          (* If player did not get a box, switches to other player's
-             turn *)
-          if List.length li = 0 then
-            if Player.name current_bot = Player.name bot1 then
-              loop_simulation bo bot_diff bot2_diff bot2
-            else loop_simulation bo bot_diff bot2_diff bot1
-          else if Board.end_game bo then display_endgame bo "Simulation"
-          else simulation_move board bot_diff bot2_diff current_bot
-      | Invalid ->
-          failwith "impossible, bot will always make a valid move")
-  | Illegal -> failwith "impossible, bot will always make a legal move"
+  (* Unix.sleep 1; *)
+  if Board.end_game board then display_endgame board "Simulation"
+  else
+    let bot_move = proper_move board bot_diff bot2_diff current_bot in
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      ("\nBot move: " ^ bot_move ^ "\n");
+    match Command.parse bot_move board with
+    | Legal t -> (
+        match State.go board current_bot t with
+        | Valid (bo, li) ->
+            (* If player did not get a box, switches to other player's
+               turn *)
+            if List.length li = 0 then
+              if Player.name current_bot = Player.name bot1 then
+                loop_simulation bo bot_diff bot2_diff bot2
+              else loop_simulation bo bot_diff bot2_diff bot1
+            else if Board.end_game bo then
+              display_endgame bo "Simulation"
+            else simulation_move board bot_diff bot2_diff current_bot
+        | Invalid ->
+            failwith "impossible, bot will always make a valid move")
+    | Illegal ->
+        failwith "impossible, bot will always make a legal move"
 
 and loop_game board player input mode =
   if Board.end_game board then display_endgame board mode
@@ -211,7 +215,7 @@ and parse_ai_input board player move level =
       loop_game board player move level
 
 and bot_move board level =
-  Unix.sleep 1;
+  (* Unix.sleep 1; *)
   let move =
     if level = "Easy" then Ai.easy board
     else if level = "Medium" then Ai.medium board
