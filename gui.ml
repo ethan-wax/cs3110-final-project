@@ -46,11 +46,13 @@ let draw_col_labels cols =
     draw_string (string_of_int i)
   done
 
-let draw_move coordinates =
-  set_color (rgb 120 120 120);
-  set_line_width 12;
-  moveto (List.nth coordinates 0) (List.nth coordinates 1);
-  lineto (List.nth coordinates 2) (List.nth coordinates 3)
+let draw_move coordinates color =
+  match color with
+  | r, g, b ->
+      set_color (rgb r g b);
+      set_line_width 12;
+      moveto (List.nth coordinates 0) (List.nth coordinates 1);
+      lineto (List.nth coordinates 2) (List.nth coordinates 3)
 
 let draw_box len pos rgb_col =
   set_color
@@ -113,14 +115,14 @@ let rec char_list_to_string lst s =
 
 let acc = ref [||]
 
-let display_line move =
+let display_line move color =
   match move with
   | [ r1; c1; r2; c2 ] ->
       let x1 = 150 + (100 * c1) in
       let y1 = 800 - (100 * r1) in
       let x2 = 150 + (100 * c2) in
       let y2 = 800 - (100 * r2) in
-      draw_move [ x1; y1; x2; y2 ]
+      draw_move [ x1; y1; x2; y2 ] color
   | _ -> failwith "Precondition violated"
 
 let display_current_player player =
@@ -141,7 +143,7 @@ let rec display_valid_move s board player mode =
   | Legal move -> (
       match State.go board player move with
       | Valid (bo, li) ->
-          display_line move;
+          display_line move (120, 120, 120);
           draw_boxes li player;
           moveto 275 130;
           draw_string ("Legal move: " ^ int_list_to_string move "");
@@ -153,17 +155,18 @@ let rec display_valid_move s board player mode =
           else if List.length li > 0 then (bo, player1)
           else ai_move board player mode
       | Invalid ->
-          display_line [ 0; 0; 0; 0 ];
+          display_line [ 0; 0; 0; 0 ] (120, 120, 120);
           moveto 275 130;
           draw_string "This move has already been done!";
           (board, player))
   | Illegal ->
-      display_line [ 0; 0; 0; 0 ];
+      display_line [ 0; 0; 0; 0 ] (120, 120, 120);
       moveto 275 130;
       draw_string "This is an illegal move!";
       (board, player)
 
 and ai_move board player mode =
+  Unix.sleep 1;
   let move =
     if mode = "Easy" then Ai.easy board
     else if mode = "Medium" then Ai.medium board
@@ -174,7 +177,7 @@ and ai_move board player mode =
   | Legal list_move -> (
       match State.go board bot list_move with
       | Valid (bo, li) ->
-          display_line list_move;
+          display_line list_move (0, 145, 0);
           draw_boxes li bot;
           moveto 200 250;
           draw_string ("Bot move: " ^ int_list_to_string list_move "");

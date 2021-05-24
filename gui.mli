@@ -7,10 +7,12 @@ val open_board : unit
 (** Draws the text per red or blue player *)
 val draw_board : int * int -> int * int -> int * int * int * int -> unit
 
-(** [draw_move coordinates] takes a list of coordinates which is are
-    starting and ending points Ex: 1 3 4 2 represents (1,3) (4,2).
-    Precondition: coordinates is a valid list of two coordinates *)
-val draw_move : int list -> unit
+(** [draw_move coordinates color] takes a list of coordinates which is
+    are starting and ending points Ex: 1 3 4 2 represents (1,3) (4,2)
+    and a color, and draws the move. Precondition: coordinates is a
+    valid list of two coordinates, color is a RGB representation of a
+    color*)
+val draw_move : int list -> int * int * int -> unit
 
 (** [draw_box len pos rgb_col] draws a box on the screen with side
     length len, positioned with its bottom left corner at pos. The box

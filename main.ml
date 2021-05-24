@@ -10,7 +10,11 @@ let player1 = create_player "Player 1" "Red"
 
 let player2 = create_player "Player 2" "Blue"
 
-let bot = create_player "Easy Bot" "Blue"
+let bot = create_player "Bot" "Blue"
+
+let bot1 = create_player "Bot 1" "Red"
+
+let bot2 = create_player "Bot 2" "Blue"
 
 (* The number of moves player 1 has made *)
 let p1moves = ref 0
@@ -26,34 +30,55 @@ let inc_move player_moves = incr player_moves
 (* When the game ends, displays who won and each players respective
    score *)
 let display_endgame board mode =
-  let p2name =
-    if mode = "Mult" then Player.name player2
-    else if mode = "Easy" then "Easy Bot"
-    else if mode = "Medium" then "Medium Bot"
-    else "Hard Bot"
-  in
-  match Board.score board with
-  | p1score, p2score ->
-      if p1score > p2score then
-        print_string
-          ("\n" ^ "------------------------------\n"
-         ^ Player.name player1 ^ " wins, the game is over! GGWP\n"
-         ^ Player.name player1 ^ " score: " ^ string_of_int p1score
-         ^ "\n" ^ p2name ^ " score: " ^ string_of_int p2score ^ "\n"
-         ^ "------------------------------\n")
-      else
-        print_string
-          ("\n" ^ "------------------------------\n" ^ p2name
-         ^ " wins, the game is over! GGWP\n" ^ Player.name player1
-         ^ " score: " ^ string_of_int p1score ^ "\n" ^ p2name
-         ^ " score: " ^ string_of_int p2score ^ "\n"
-         ^ "------------------------------\n")
+  if mode = "Simulation" then
+    let p1name = Player.name bot1 in
+    let p2name = Player.name bot2 in
+    match Board.score board with
+    | p1score, p2score ->
+        if p1score > p2score then
+          print_string
+            ("\n" ^ "------------------------------\n" ^ p1name
+           ^ " wins, the simulation is over! Bots rein supreme.\n"
+           ^ p1name ^ " score: " ^ string_of_int p1score ^ "\n" ^ p2name
+           ^ " score: " ^ string_of_int p2score ^ "\n"
+           ^ "------------------------------\n")
+        else
+          print_string
+            ("\n" ^ "------------------------------\n" ^ p2name
+           ^ " wins, the simulation is over! Bots rein supreme.\n"
+           ^ p1name ^ " score: " ^ string_of_int p1score ^ "\n" ^ p2name
+           ^ " score: " ^ string_of_int p2score ^ "\n"
+           ^ "------------------------------\n")
+  else
+    let p2name =
+      if mode = "Mult" then Player.name player2
+      else if mode = "Easy" then "Easy Bot"
+      else if mode = "Medium" then "Medium Bot"
+      else "Hard Bot"
+    in
+    match Board.score board with
+    | p1score, p2score ->
+        if p1score > p2score then
+          print_string
+            ("\n" ^ "------------------------------\n"
+           ^ Player.name player1 ^ " wins, the game is over! GGWP\n"
+           ^ Player.name player1 ^ " score: " ^ string_of_int p1score
+           ^ "\n" ^ p2name ^ " score: " ^ string_of_int p2score ^ "\n"
+           ^ "------------------------------\n")
+        else
+          print_string
+            ("\n" ^ "------------------------------\n" ^ p2name
+           ^ " wins, the game is over! GGWP\n" ^ Player.name player1
+           ^ " score: " ^ string_of_int p1score ^ "\n" ^ p2name
+           ^ " score: " ^ string_of_int p2score ^ "\n"
+           ^ "------------------------------\n")
 
 let rec loop_mode mode =
   ANSITerminal.print_string [ ANSITerminal.red ] mode;
   ANSITerminal.print_string [ ANSITerminal.red ]
     "\n\
-    \ Type the mode you want to play: Easy | Medium | Hard | Multiplayer\n";
+    \ Type the mode you want to play: Easy | Medium | Hard | \
+     Multiplayer | Simulation\n";
   match read_line () with
   | exception End_of_file -> ()
   | player_input ->
@@ -66,7 +91,80 @@ let rec loop_mode mode =
         loop_game init_board player1 "" "Medium"
       else if player_input = "Hard" then
         loop_game init_board player1 "" "Hard"
+      else if player_input = "Simulation" then bot_difficulty ""
       else loop_mode "\n Error: Not a valid mode!\n"
+
+and bot_difficulty diff =
+  ANSITerminal.print_string [ ANSITerminal.red ] diff;
+  ANSITerminal.print_string [ ANSITerminal.red ]
+    "\n Type the difficulty of bot 1: Easy | Medium | Hard \n";
+  match read_line () with
+  | exception End_of_file -> ()
+  | player_input ->
+      let player_input = String.trim player_input in
+      if player_input = "Easy" then bot2_difficulty "" "Easy"
+      else if player_input = "Medium" then bot2_difficulty "" "Medium"
+      else if player_input = "Hard" then bot2_difficulty "" "Hard"
+      else bot_difficulty "\n Error: Not a valid difficulty!\n"
+
+and bot2_difficulty diff bot_diff =
+  ANSITerminal.print_string [ ANSITerminal.red ] diff;
+  ANSITerminal.print_string [ ANSITerminal.red ]
+    "\n Type the difficulty of bot 2: Easy | Medium | Hard \n";
+  match read_line () with
+  | exception End_of_file -> ()
+  | player_input ->
+      let player_input = String.trim player_input in
+      if player_input = "Easy" then
+        loop_simulation init_board bot_diff "Easy" bot1
+      else if player_input = "Medium" then
+        loop_simulation init_board bot_diff "Medium" bot1
+      else if player_input = "Hard" then
+        loop_simulation init_board bot_diff "Hard" bot1
+      else
+        bot2_difficulty "\n Error: Not a valid difficulty!\n" bot_diff
+
+and loop_simulation board bot_diff bot2_diff current_bot =
+  if Board.end_game board then display_endgame board "Simulation"
+  else
+    let botname = Player.name current_bot in
+    print_endline (botname ^ "'s" ^ " turn.\n");
+    print_string "> ";
+    simulation_move board bot_diff bot2_diff current_bot
+
+and proper_move board bot_diff bot2_diff current_bot =
+  let current_diff =
+    if Player.name current_bot = Player.name bot1 then bot_diff
+    else bot2_diff
+  in
+  ANSITerminal.print_string [ ANSITerminal.red ] current_diff;
+  let move =
+    if current_diff = "Easy" then Ai.easy board
+    else if current_diff = "Medium" then Ai.medium board
+    else Ai.hard board
+  in
+  move
+
+and simulation_move board bot_diff bot2_diff current_bot =
+  Unix.sleep 1;
+  let bot_move = proper_move board bot_diff bot2_diff current_bot in
+  ANSITerminal.print_string [ ANSITerminal.red ]
+    ("\nBot move: " ^ bot_move ^ "\n");
+  match Command.parse bot_move board with
+  | Legal t -> (
+      match State.go board current_bot t with
+      | Valid (bo, li) ->
+          (* If player did not get a box, switches to other player's
+             turn *)
+          if List.length li = 0 then
+            if Player.name current_bot = Player.name bot1 then
+              loop_simulation bo bot_diff bot2_diff bot2
+            else loop_simulation bo bot_diff bot2_diff bot1
+          else if Board.end_game bo then display_endgame bo "Simulation"
+          else simulation_move board bot_diff bot2_diff current_bot
+      | Invalid ->
+          failwith "impossible, bot will always make a valid move")
+  | Illegal -> failwith "impossible, bot will always make a legal move"
 
 and loop_game board player input mode =
   if Board.end_game board then display_endgame board mode
@@ -113,6 +211,7 @@ and parse_ai_input board player move level =
       loop_game board player move level
 
 and bot_move board level =
+  Unix.sleep 1;
   let move =
     if level = "Easy" then Ai.easy board
     else if level = "Medium" then Ai.medium board

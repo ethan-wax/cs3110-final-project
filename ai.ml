@@ -71,6 +71,7 @@ let get_empty_branches board =
 
 let easy board =
   get_empty_branches board;
+  Random.self_init ();
   let rand_index = Random.int (Array.length !valid_moves - 1) in
   let ai_move = Array.get !valid_moves rand_index in
   valid_moves := [||];
@@ -86,6 +87,7 @@ let edge_moves = ref [||]
 let complete_box_moves = ref [||]
 
 let medium board =
+  Random.self_init ();
   let sides_matrix_board = sides_matrix board in
   (* Searches sides_matrix for points which have 3 sides completed, if 3
      sides are completed, then the available move corresponding to the
