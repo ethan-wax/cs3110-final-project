@@ -1,5 +1,7 @@
+(** Player information with name and color *)
 open Board
 
+(** Abstract type of a player. *)
 type t
 
 (** [name player] is the name associated with player. *)

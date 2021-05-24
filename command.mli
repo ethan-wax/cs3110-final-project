@@ -1,3 +1,4 @@
+(** Parsing of player moves. *)
 open Board
 
 (** The type of parses. A parse either produces a Legal list of integers
