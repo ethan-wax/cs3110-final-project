@@ -11,6 +11,10 @@ let player2 = create_player "Player 2" "Blue"
 
 let bot = create_player "Bot" "Blue"
 
+let bot1 = create_player "Bot 1" "Red"
+
+let bot2 = create_player "Bot 2" "Blue"
+
 let instructions =
   [
     "To make a move, type in this format: 'r1 c2 r2 c2'";
@@ -248,6 +252,42 @@ and char_input acc key board player mode =
   done;
   player_input () board player mode
 
+and loop_simulation board bot_diff bot2_diff current_bot =
+  if Board.end_game board then end_game board current_bot "Simulation"
+  else simulation_move board bot_diff bot2_diff current_bot
+
+and proper_move board bot_diff bot2_diff current_bot =
+  let current_diff =
+    if Player.name current_bot = Player.name bot1 then bot_diff
+    else bot2_diff
+  in
+  let move =
+    if current_diff = "Easy" then Ai.easy board
+    else if current_diff = "Medium" then Ai.medium board
+    else Ai.hard board
+  in
+  move
+
+and simulation_move board bot_diff bot2_diff current_bot =
+  Unix.sleep 1;
+  if Board.end_game board then ()
+  else
+    let bot_move = proper_move board bot_diff bot2_diff current_bot in
+    match parse bot_move board with
+    | Legal list_bot_move -> (
+        match State.go board current_bot list_bot_move with
+        | Valid (bo, li) ->
+            display_line list_bot_move (0, 145, 0);
+            draw_boxes li current_bot;
+            if List.length li = 0 || Board.end_game bo then
+              if Player.name current_bot = Player.name bot1 then
+                loop_simulation bo bot_diff bot2_diff bot2
+              else loop_simulation bo bot_diff bot2_diff bot1
+            else simulation_move bo bot_diff bot2_diff current_bot
+        | Invalid ->
+            failwith "impossible, bot will always make a valid move ")
+    | Illegal -> failwith "bot will always make a legal move"
+
 let board_dimensions = (5, 5)
 
 let window_dimensions = (800, 1000)
@@ -264,7 +304,7 @@ let draw_instructions pos =
         draw_string (List.nth instructions i)
   done
 
-let draw_board brd_dim win_dim count_dim =
+let draw_board brd_dim win_dim count_dim mode =
   let default_board = make_board (fst brd_dim, snd brd_dim) in
   init_graph (0, 0);
   resize_window (fst win_dim) (snd win_dim);
@@ -284,7 +324,10 @@ let draw_board brd_dim win_dim count_dim =
       draw_row_labels (fst brd_dim);
       draw_col_labels (snd brd_dim);
       display_current_player player1;
-      player_input () default_board player1 "Medium"
+      if mode = "Simulation" then
+        loop_simulation default_board "Easy" "Medium" bot1
+      else player_input () default_board player1 "Medium"
 
 let open_board =
   draw_board board_dimensions window_dimensions counter_dimensions
+    "Simulation"
