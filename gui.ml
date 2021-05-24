@@ -221,24 +221,27 @@ and end_game brd plyr mode =
   moveto 300 550;
   match Board.score brd with
   | p1score, p2score ->
-      let name =
+      let p1name =
+        if mode = "Simulation" then Player.name bot1
+        else Player.name player1
+      in
+      let p2name =
         if mode = "Mult" then Player.name player2
+        else if mode = "Simulation" then Player.name bot2
         else if mode = "Easy" then "The Easy Bot"
         else if mode = "Medium" then "The Medium Bot"
         else "The Hard Bot"
       in
       if p1score > p2score then
-        draw_string
-          (Player.name player1 ^ " wins, the game is over! GGWP")
-      else draw_string (name ^ " wins, the game is over! GGWP");
+        draw_string (p1name ^ " wins, the game is over! GGWP")
+      else draw_string (p2name ^ " wins, the game is over! GGWP");
       moveto 300 500;
       set_color red;
-      draw_string
-        (Player.name player1 ^ " score: " ^ string_of_int p1score);
+      draw_string (p1name ^ " score: " ^ string_of_int p1score);
       moveto 300 450;
       set_color blue;
-      draw_string (name ^ " score: " ^ string_of_int p2score);
-      moveto 300 400;
+      draw_string (p2name ^ " score: " ^ string_of_int p2score);
+      moveto 200 400;
       draw_string
         "Press Q to quit out of the game! Thanks for playing. Try all \
          of the different bot difficulties";
@@ -277,7 +280,12 @@ and simulation_move board bot_diff bot2_diff current_bot =
     | Legal list_bot_move -> (
         match State.go board current_bot list_bot_move with
         | Valid (bo, li) ->
-            display_line list_bot_move (0, 145, 0);
+            let col =
+              if Player.name current_bot = Player.name bot1 then
+                (0, 145, 0)
+              else (0, 235, 0)
+            in
+            display_line list_bot_move col;
             draw_boxes li current_bot;
             if List.length li = 0 || Board.end_game bo then
               if Player.name current_bot = Player.name bot1 then
@@ -325,7 +333,7 @@ let draw_board brd_dim win_dim count_dim mode =
       draw_col_labels (snd brd_dim);
       display_current_player player1;
       if mode = "Simulation" then
-        loop_simulation default_board "Easy" "Medium" bot1
+        loop_simulation default_board "Medium" "Easy" bot1
       else player_input () default_board player1 "Medium"
 
 let open_board =

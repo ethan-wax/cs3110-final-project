@@ -86,7 +86,7 @@ let get_empty_branches board =
 let easy board =
   get_empty_branches board;
   Random.self_init ();
-  let rand_index = Random.int (Array.length !valid_moves - 1) in
+  let rand_index = Random.int (Array.length !valid_moves) in
   let ai_move = Array.get !valid_moves rand_index in
   valid_moves := [||];
   ai_move
