@@ -4,9 +4,15 @@ open Board
 let valid_moves = ref [||]
 
 let get_empty_branch r1 c1 r2 c2 board =
+  (* Points (r1, c1) and (r2, c2) *)
   let string_move =
     string_of_int r1 ^ " " ^ string_of_int c1 ^ " " ^ string_of_int r2
     ^ " " ^ string_of_int c2 ^ " "
+  in
+  (* Same move but represented as points (r2, c2) and (r1, c1) *)
+  let alt_string_move =
+    string_of_int r2 ^ " " ^ string_of_int c2 ^ " " ^ string_of_int r1
+    ^ " " ^ string_of_int c1 ^ " "
   in
   match Command.parse string_move board with
   | Legal _ -> (
@@ -14,7 +20,17 @@ let get_empty_branch r1 c1 r2 c2 board =
       match Board.branch_filled tuple_move board with
       | true -> ()
       | false ->
-          valid_moves := Array.append !valid_moves [| string_move |])
+          (* Checks if alt move is already added to valid_moves. Does
+             not add if move is already in valid_move *)
+          if
+            Array.exists
+              (fun x ->
+                if x = string_move || x = alt_string_move then true
+                else false)
+              !valid_moves
+          then ()
+          else
+            valid_moves := Array.append !valid_moves [| string_move |])
   | Illegal -> ()
 
 let empty_sides r c board =

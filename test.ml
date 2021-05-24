@@ -370,6 +370,12 @@ let medium_bot_test
   name >:: fun _ ->
   assert_equal expected_output (on_edge board (Ai.medium board))
 
+let medium_bot_complete_box_test
+    (name : string)
+    (board : Board.t)
+    (expected_output : string) : test =
+  name >:: fun _ -> assert_equal expected_output (Ai.medium board)
+
 let board_with_no_edge_moves =
   update_board
     ((2, 1), (2, 2))
@@ -397,12 +403,23 @@ let board_with_no_edge_moves =
                          Red
                          (make_board (2, 2)))))))))
 
+let board_complete_one_box_5x5 =
+  update_board
+    ((1, 2), (1, 3))
+    Red
+    (update_board
+       ((2, 2), (2, 3))
+       Blue
+       (update_board ((1, 2), (2, 2)) Red (make_board (5, 5))))
+
 let ai_tests =
   [
     medium_bot_test "blank board, move should be on the edge"
       default_board true;
     medium_bot_test "board with no edge moves available"
       board_with_no_edge_moves false;
+    medium_bot_complete_box_test "board with one box to be completed"
+      board_complete_one_box_5x5 "1 3 2 3";
   ]
 
 let suite =
