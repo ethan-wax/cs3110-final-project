@@ -325,7 +325,7 @@ let draw_board brd_dim win_dim count_dim mode =
       draw_col_labels (snd brd_dim);
       display_current_player player1;
       if mode = "Simulation" then
-        loop_simulation default_board "Easy" "Medium" bot1
+        loop_simulation default_board "Medium" "Hard" bot1
       else player_input () default_board player1 "Medium"
 
 let open_board =

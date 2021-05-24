@@ -98,14 +98,7 @@ let find_box_finish sides_matrix_board board =
     done
   done
 
-let medium board =
-  Random.self_init ();
-  let sides_matrix_board = sides_matrix board in
-  find_box_finish sides_matrix_board board;
-  (* let sides_matrix_board = sides_matrix board in if Array.get
-     (Array.get sides_matrix_board 0) 0 = 3 then complete_box_moves :=
-     Array.append !complete_box_moves [| "0 1 1 1" |] else (); *)
-  get_empty_branches board;
+let get_edges board =
   for h = 0 to Array.length !valid_moves - 1 do
     (* Converts single move from array list to a tuple of tuples. *)
     let move_point_lst =
@@ -134,7 +127,17 @@ let medium board =
       edge_moves :=
         Array.append !edge_moves [| Array.get !valid_moves h |]
     else ()
-  done;
+  done
+
+let medium board =
+  Random.self_init ();
+  let sides_matrix_board = sides_matrix board in
+  find_box_finish sides_matrix_board board;
+  (* let sides_matrix_board = sides_matrix board in if Array.get
+     (Array.get sides_matrix_board 0) 0 = 3 then complete_box_moves :=
+     Array.append !complete_box_moves [| "0 1 1 1" |] else (); *)
+  get_empty_branches board;
+  get_edges board;
   (* First checks if there are boxes to be completed, then chooses a
      random move from the available boxes. Then checks if there are edge
      moves available and chooses a random edge move. Lastly, makes a
@@ -157,17 +160,14 @@ let medium board =
     valid_moves := [||];
     ai_move
 
-let non_box_moves = ref [||]
+let bad_moves = ref [||]
 
 let find_box_not_finish sides_matrix_board board =
   for row = 0 to Array.length sides_matrix_board - 1 do
     for col = 0 to Array.length (Array.get sides_matrix_board 0) - 1 do
-      if
-        Array.get (Array.get sides_matrix_board row) col = 0
-        || Array.get (Array.get sides_matrix_board row) col = 1
-      then
-        non_box_moves :=
-          Array.append !non_box_moves
+      if Array.get (Array.get sides_matrix_board row) col = 2 then
+        bad_moves :=
+          Array.append !bad_moves
             [| List.hd (empty_sides row col board) |]
       else ()
     done
@@ -180,21 +180,49 @@ let hard board =
      sides are completed, then the available move corresponding to the
      point is found. This move is added to complete_box_moves array. *)
   find_box_finish sides_matrix_board board;
-  (* Searches sides_matrix for points which don't have 2 sides completed
-     to avoid creating a new box for the player to close. If there are 1
-     or 2 sides are completed, then the available move corresponding to
-     the point is found. This move is added to complete_box_moves array.*)
+  (* Searches sides_matrix for boxes which have 2 sides completed to
+     avoid creating a new box for the player to close. If there are 2
+     sides are completed, then the available move corresponding to the
+     point is found. This move is added to bad_moves array.*)
   find_box_not_finish sides_matrix_board board;
+  get_empty_branches board;
+  get_edges board;
   if Array.length !complete_box_moves > 0 then (
     let rand_index = Random.int (Array.length !complete_box_moves) in
     let ai_move = Array.get !complete_box_moves rand_index in
-    complete_box_moves := [||];
+    bad_moves := [||];
+    valid_moves := [||];
+    edge_moves := [||];
     ai_move)
-  else if Array.length !non_box_moves > 0 then (
-    let rand_index = Random.int (Array.length !non_box_moves) in
-    let ai_move = Array.get !non_box_moves rand_index in
-    non_box_moves := [||];
-    ai_move
-    (* If no moves are found that satisfy the above criteria, simply
-       return a random move.*))
-  else easy board
+  else
+    let moves = Array.to_list !valid_moves in
+    let good_moves =
+      List.filter
+        (fun x -> not (Array.exists (fun y -> y <> x) !bad_moves))
+        moves
+    in
+    let best_moves =
+      List.filter
+        (fun x -> Array.exists (fun y -> y = x) !edge_moves)
+        good_moves
+    in
+    if List.length best_moves > 0 then (
+      let rand_index = Random.int (List.length best_moves) in
+      let ai_move = List.nth best_moves rand_index in
+      bad_moves := [||];
+      valid_moves := [||];
+      edge_moves := [||];
+      ai_move)
+    else if List.length good_moves > 0 then (
+      let rand_index = Random.int (List.length good_moves) in
+      let ai_move = List.nth good_moves rand_index in
+      bad_moves := [||];
+      valid_moves := [||];
+      edge_moves := [||];
+      ai_move)
+    else
+      let _ = () in
+      bad_moves := [||];
+      valid_moves := [||];
+      edge_moves := [||];
+      easy board
