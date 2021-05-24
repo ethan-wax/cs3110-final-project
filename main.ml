@@ -164,7 +164,7 @@ and simulation_move board bot_diff bot2_diff current_bot =
               else loop_simulation bo bot_diff bot2_diff bot1
             else if Board.end_game bo then
               display_endgame bo "Simulation"
-            else simulation_move board bot_diff bot2_diff current_bot
+            else simulation_move bo bot_diff bot2_diff current_bot
         | Invalid ->
             failwith "impossible, bot will always make a valid move")
     | Illegal ->

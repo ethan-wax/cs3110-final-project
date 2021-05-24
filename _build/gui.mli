@@ -1,3 +1,4 @@
+(** Visual representation of game. *)
 open Player
 
 (** open_board mode opens the graph for the user and defines the

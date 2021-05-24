@@ -60,7 +60,6 @@ let empty_sides r c board =
     ^ " " ^ string_of_int c
   in
   let lst = ref [] in
-  (* Note: Does this check left if top is empty???????? *)
   if not (branch_filled ((r, c), (r, c + 1)) board) then
     lst := top :: !lst;
   if not (branch_filled ((r, c), (r + 1, c)) board) then
@@ -214,7 +213,7 @@ let hard board =
     let moves = Array.to_list !valid_moves in
     let good_moves =
       List.filter
-        (fun x -> not (Array.exists (fun y -> y <> x) !bad_moves))
+        (fun x -> Array.exists (fun y -> y <> x) !bad_moves)
         moves
     in
     let best_moves =
