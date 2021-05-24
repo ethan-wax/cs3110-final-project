@@ -1,11 +1,30 @@
-(** Test plan: The test plan should be located in a comment at the top
-    of the test file. -4: The test plan is missing. -1: The test plan
-    does not explain which parts of the system were automatically tested
-    by OUnit vs. manually tested. -1: The test plan does not explain
-    what modules were tested by OUnit and how test cases were developed
-    (black box, glass box, randomized, etc.). -1: The test plan does not
-    provide an argument for why the testing approach demonstrates the
-    correctness of the system. *)
+(** 
+    Test Plan: 
+    - what was automatically tested by OUnit??
+
+    For testing, we wanted to test as many possible game combinaations 
+    and conditions. Our goal was to have our test suite be exaustive of the 
+    cases a user could encounter while not being repetitive. To do this, we
+    complied our test suite by looking at each .ml file and deciding which 
+    functions contained significant variables that could lead to sources 
+    of error. We also preformed a lot of front-end user testing by running the 
+    application in the GUI and playing the game. This allowed us to visibly see
+    what errors a player would encounter and work bacckwards to solve those
+    errors in our code.
+
+    The majority of our OUnit tests were done using glass box testing. By 
+    breaking our game down into its individual features like the board size, 
+    level difficulty, colors, and user commands we could test each of these 
+    individually. Glass-box testing was used on the side matrix because we
+    needed to test 
+
+    black box - game ended
+    glass box - everything else 
+    randomized - AI
+
+    By combining manual and OUnit testing we are able to confirm the overall
+    correctness of our system.
+    *)
 
 open OUnit2
 open Board
@@ -115,6 +134,18 @@ let get_branch_test
     (get_branch points board)
     ~printer:color_printer
 
+let direction_test (name: string) (x1 : int) (x2 : int) (y1 : int) (y2 : int) 
+  expected_output : test =
+  name >:: fun _ ->
+  assert_equal expected_output (direction x1 x2 y1 y2)
+  (*~printer: *)
+
+let branch_filled_test (name: string) (points: (int * int)*(int * int)) board : Board.t)
+expected_output : test =
+name >:: fun _ ->
+assert_equal expected_output
+(branch_filled points board)
+~printer:color_printer
 let score_test
     (name : string)
     (board : Board.t)
@@ -174,6 +205,12 @@ let dimensions_tests =
 
 let board_tests =
   [
+    (*Direction Tests*)
+    direction_test "Right" 1 2 0 0 Right;
+    direction_test "Left" 2 1 0 0 Left;
+    direction_test "Down" 0 0 1 2 Down;
+    direction_test "Up" 0 0 0 0 Up;
+    (*Get_Branch Tests*)
     get_branch_test "default board has no branch (0,0) -> (1,0)"
       ((0, 0), (1, 0))
       default_board Blank;
@@ -247,6 +284,13 @@ let board_tests =
     get_branch_test "bbwtb has no branch (4,3) -> (5,3)"
       ((4, 3), (5, 3))
       big_board_with_two_boxes Blank;
+    (*Branch_filled*)
+    branch_filled_test "default board is not filled -> false"
+      ((0, 0), (1, 0)) branch_filled false;
+    branch_filled_test "board with move has a red branch -> true" 
+      ((0, 0), (1, 0)) branch_filled true;
+    branch_filled_test "board with move has a blue branch -> true" 
+      ((0, 0), (0, 1)) branch_filled true;
   ]
 
 let score_tests =
