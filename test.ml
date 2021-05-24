@@ -305,6 +305,8 @@ let score_tests =
   [
     score_test "default board has score (0,0)" default_board (0, 0);
     score_test "board with box has score (0,1)" board_with_box (0, 1);
+    score_test "board with two boxes has score (0,2)"
+      big_board_with_two_boxes (0, 2);
   ]
 
 let end_game_tests =
@@ -470,7 +472,9 @@ let ai_tests =
       default_board true;
     medium_bot_test "board with no edge moves available"
       board_with_no_edge_moves false;
-    medium_bot_complete_box_test "board with one box to be completed"
+    medium_bot_complete_box_test
+      "board with one box to be completed- should priortize the box \
+       and fill it in"
       board_complete_one_box_5x5 "1 3 2 3";
   ]
 
