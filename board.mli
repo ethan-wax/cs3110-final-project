@@ -33,7 +33,8 @@ val get_branch : (int * int) * (int * int) -> t -> color
 (** [direction x1 y1 x2 y2] is the direction of a move from x1 y1 to x2 y2*)
 val direction : int -> int -> int -> int -> direc 
 
-(** [branch_filled points board] have to write the spec. *)
+(** [branch_filled points board] returns true if the branch is filled 
+    at that move.*)
 val branch_filled : (int * int) * (int * int) -> t -> bool
 
 (** [dimensions board] are the dimensions of board, i.e. if the board
