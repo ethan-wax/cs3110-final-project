@@ -288,6 +288,8 @@ and player_stats board player mode =
      ^ "\n-------------------------" ^ "\n");
   loop_game board player "" mode
 
+(* The printing feature is mainly used for debugging, it does not give a
+   very good representation of the board.*)
 and print_board board player mode =
   let row1 = row_colors board 0 0 5 in
   let row2 = row_colors board 0 1 5 in
@@ -303,7 +305,10 @@ and print_board board player mode =
   let col6 = col_colors board 5 0 5 in
   let rows = [ row1; row2; row3; row4; row5; row6 ] in
   let cols = [ col1; col2; col3; col4; col5; col6 ] in
+  print_string "rows:\n";
   print_rows rows;
+  print_string "cols:\n";
+  print_rows cols;
   loop_game board player "" mode
 
 (* Row_colors returns a list with just the colors in each row. I is the
