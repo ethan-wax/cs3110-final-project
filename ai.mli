@@ -1,7 +1,9 @@
 (** Easy, Medium, and Hard AI *)
 open Board
 
-val empty_sides : Board.t -> string list
+(** [empty_sides row col board] returns a string list of empty sides
+    based on the row and col position. *)
+val empty_sides : int -> int -> Board.t -> string list
 
 (** Takes in a board and returns a move. Easy AI randomly picks
     available moves and returns the move in the format "r1 c2 r2 c2". *)

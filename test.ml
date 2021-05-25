@@ -90,62 +90,66 @@ let board_with_box_player1 =
     ((0, 1), (0, 0))
     Red
     (update_board
-      ((1, 1), (0, 1))
-      Blue
-      (update_board
+       ((1, 1), (0, 1))
+       Blue
+       (update_board
           ((1, 0), (1, 1))
           Red
           (update_board ((0, 0), (1, 0)) Blue (make_board (1, 1)))))
 
 let big_board_with_two_boxes =
   update_board
-    ((3, 3), (3, 4))
-    Blue
+    ((0, 2), (1, 2))
+    Red
     (update_board
-       ((3, 4), (4, 4))
-       Red
+       ((3, 3), (3, 4))
+       Blue
        (update_board
-          ((4, 4), (4, 3))
-          Blue
+          ((3, 4), (4, 4))
+          Red
           (update_board
-             ((4, 3), (3, 3))
-             Red
+             ((4, 4), (4, 3))
+             Blue
              (update_board
-                ((0, 1), (0, 0))
-                Blue
+                ((4, 3), (3, 3))
+                Red
                 (update_board
-                   ((1, 1), (0, 1))
-                   Red
+                   ((0, 1), (0, 0))
+                   Blue
                    (update_board
-                      ((1, 0), (1, 1))
-                      Blue
+                      ((1, 1), (0, 1))
+                      Red
                       (update_board
-                         ((0, 0), (1, 0))
-                         Red
-                         (make_board (5, 5)))))))))
+                         ((1, 0), (1, 1))
+                         Blue
+                         (update_board
+                            ((0, 0), (1, 0))
+                            Red
+                            (make_board (5, 5))))))))))
+
 let one_box_per_player =
   update_board
     ((2, 1), (2, 0))
     Red
     (update_board
-        ((2, 1), (1, 1))
-        Blue
-        (update_board
+       ((2, 1), (1, 1))
+       Blue
+       (update_board
           ((2, 0), (1, 0))
           Red
           (update_board
-              ((1, 1), (1, 0))
-              Blue
-              (update_board
+             ((1, 1), (1, 0))
+             Blue
+             (update_board
                 ((1, 1), (0, 1))
                 Red
                 (update_board
-                    ((0, 0), (1, 0))
-                    Blue
-                    (update_board
+                   ((0, 0), (1, 0))
+                   Blue
+                   (update_board
                       ((0, 0), (0, 1))
-                      Red 
-                      make_board (3,3)
+                      Red
+                      (make_board (3, 3))))))))
 
 let bug_target = update_board ((3, 3), (3, 4)) Red (make_board (5, 5))
 
@@ -339,10 +343,10 @@ let score_tests =
     score_test "board with box has score (0,1)" board_with_box (0, 1);
     score_test "board with two boxes has score (0,2)"
       big_board_with_two_boxes (0, 2);
-    score_test "board with one box for each player has score (1,1)" 
-      one_box_per_player (1,1);
-    score_test "board with box Player1 has score (1,0)" 
-      board_with_box_player1 (1,0);
+    score_test "board with one box for each player has score (1,1)"
+      one_box_per_player (1, 1);
+    score_test "board with box Player1 has score (1,0)"
+      board_with_box_player1 (1, 0);
   ]
 
 let end_game_tests =
@@ -351,8 +355,8 @@ let end_game_tests =
       false;
     end_game_test "board with box has reached end game" board_with_box
       true;
-    end_game_test "board with 2 boxes has reached end game" 
-      big_board_with_two_boxes true;
+    end_game_test "board with 2 boxes has reached end game"
+      big_board_with_two_boxes false;
   ]
 
 let side_matrix_tests =
@@ -378,17 +382,8 @@ let side_matrix_tests =
       "board_with_two_boxes should have value of 4 at box (3,3)"
       big_board_with_two_boxes 3 3 4;
     sides_matrix_test
-      "board_with_two_boxes should have value of 3 at box (3,4)"
-      big_board_with_two_boxes 3 4 3;
-    sides_matrix_test
-      "board_with_two_boxes should have value of 3 at box (4,3)"
-      big_board_with_two_boxes 4 3 3;
-    sides_matrix_test
-      "board_with_two_boxes should have value of 2 at box (2,3)"
-      big_board_with_two_boxes 2 3 2;
-    sides_matrix_test
-      "board_with_two_boxes should have value of 2 at box (3,3)"
-      big_board_with_two_boxes 3 3 2;
+      "board_with_two_boxes should have value of 2 at box (0,1)"
+      big_board_with_two_boxes 0 1 2;
   ]
 
 let command_tests =
