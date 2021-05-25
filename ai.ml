@@ -3,17 +3,20 @@ open Board
 (** Quadrap*)
 let valid_moves = ref [||]
 
+let convert_string r1 c1 r2 c2 =
+  string_of_int r1 ^ " " ^ string_of_int c1 ^ " " ^ string_of_int r2
+  ^ " " ^ string_of_int c2 ^ " "
+
+let convert_alt_string r1 c1 r2 c2 =
+  string_of_int r2 ^ " " ^ string_of_int c2 ^ " " ^ string_of_int r1
+  ^ " " ^ string_of_int c1 ^ " "
+
 let get_empty_branch r1 c1 r2 c2 board =
   (* Points (r1, c1) and (r2, c2) *)
-  let string_move =
-    string_of_int r1 ^ " " ^ string_of_int c1 ^ " " ^ string_of_int r2
-    ^ " " ^ string_of_int c2 ^ " "
-  in
+  let string_move = convert_string r1 c1 r2 c2 in
+
   (* Same move but represented as points (r2, c2) and (r1, c1) *)
-  let alt_string_move =
-    string_of_int r2 ^ " " ^ string_of_int c2 ^ " " ^ string_of_int r1
-    ^ " " ^ string_of_int c1 ^ " "
-  in
+  let alt_string_move = convert_alt_string r1 c1 r2 c2 in
   match Command.parse string_move board with
   | Legal _ -> (
       let tuple_move = ((r1, c1), (r2, c2)) in
@@ -33,32 +36,39 @@ let get_empty_branch r1 c1 r2 c2 board =
             valid_moves := Array.append !valid_moves [| string_move |])
   | Illegal -> ()
 
+let get_top r c =
+  string_of_int r ^ " " ^ string_of_int c ^ " " ^ string_of_int r ^ " "
+  ^ string_of_int (c + 1)
+
+let get_bottom r c =
+  string_of_int (r + 1)
+  ^ " " ^ string_of_int c ^ " "
+  ^ string_of_int (r + 1)
+  ^ " "
+  ^ string_of_int (c + 1)
+
+let get_right r c =
+  string_of_int r ^ " "
+  ^ string_of_int (c + 1)
+  ^ " "
+  ^ string_of_int (r + 1)
+  ^ " "
+  ^ string_of_int (c + 1)
+
+let get_left r c =
+  string_of_int r ^ " " ^ string_of_int c ^ " "
+  ^ string_of_int (r + 1)
+  ^ " " ^ string_of_int c
+
 let empty_sides r c board =
-  let top =
-    string_of_int r ^ " " ^ string_of_int c ^ " " ^ string_of_int r
-    ^ " "
-    ^ string_of_int (c + 1)
-  in
-  let bottom =
-    string_of_int (r + 1)
-    ^ " " ^ string_of_int c ^ " "
-    ^ string_of_int (r + 1)
-    ^ " "
-    ^ string_of_int (c + 1)
-  in
-  let right =
-    string_of_int r ^ " "
-    ^ string_of_int (c + 1)
-    ^ " "
-    ^ string_of_int (r + 1)
-    ^ " "
-    ^ string_of_int (c + 1)
-  in
-  let left =
-    string_of_int r ^ " " ^ string_of_int c ^ " "
-    ^ string_of_int (r + 1)
-    ^ " " ^ string_of_int c
-  in
+  let top = get_top r c in
+
+  let bottom = get_bottom r c in
+
+  let right = get_right r c in
+
+  let left = get_left r c in
+
   let lst = ref [] in
   if not (branch_filled ((r, c), (r, c + 1)) board) then
     lst := top :: !lst;
@@ -113,6 +123,18 @@ let find_box_finish sides_matrix_board board =
     done
   done
 
+let check_sides tuple_move board =
+  let r1 = int_of_string (fst (fst tuple_move)) in
+  let c1 = int_of_string (snd (fst tuple_move)) in
+  let r2 = int_of_string (fst (snd tuple_move)) in
+  let c2 = int_of_string (snd (snd tuple_move)) in
+  let board_r = fst (Board.dimensions board) in
+  let board_c = fst (Board.dimensions board) in
+  (c1 = 0 && c2 = 0)
+  || (c1 = board_c && c2 = board_c)
+  || (r1 = 0 && r2 = 0)
+  || (r1 = board_r && r2 = board_r)
+
 let get_edges board =
   for h = 0 to Array.length !valid_moves - 1 do
     (* Converts single move from array list to a tuple of tuples. *)
@@ -128,16 +150,7 @@ let get_edges board =
        go to next element in array *)
     if
       (* Checking left, right, top, bottom sides *)
-      let r1 = int_of_string (fst (fst tuple_move)) in
-      let c1 = int_of_string (snd (fst tuple_move)) in
-      let r2 = int_of_string (fst (snd tuple_move)) in
-      let c2 = int_of_string (snd (snd tuple_move)) in
-      let board_r = fst (Board.dimensions board) in
-      let board_c = fst (Board.dimensions board) in
-      (c1 = 0 && c2 = 0)
-      || (c1 = board_c && c2 = board_c)
-      || (r1 = 0 && r2 = 0)
-      || (r1 = board_r && r2 = board_r)
+      check_sides tuple_move board
     then
       edge_moves :=
         Array.append !edge_moves [| Array.get !valid_moves h |]
@@ -148,9 +161,6 @@ let medium board =
   Random.self_init ();
   let sides_matrix_board = sides_matrix board in
   find_box_finish sides_matrix_board board;
-  (* let sides_matrix_board = sides_matrix board in if Array.get
-     (Array.get sides_matrix_board 0) 0 = 3 then complete_box_moves :=
-     Array.append !complete_box_moves [| "0 1 1 1" |] else (); *)
   get_empty_branches board;
   get_edges board;
   (* First checks if there are boxes to be completed, then chooses a
