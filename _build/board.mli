@@ -8,6 +8,13 @@ type color =
   | Red
   | Blue
 
+(** The direction of a move at a given point.*)
+type direc =
+  | Left
+  | Right
+  | Up
+  | Down
+
 (** [make_board size] initializes a new board with sizes indicated by
     [size]. Requires: Both values of [size] must be greater or equal to
     1. *)
@@ -22,6 +29,9 @@ val update_board : (int * int) * (int * int) -> color -> t -> t
     [points] or blank if no connection exists. Requires: There must be a
     valid path between the two points *)
 val get_branch : (int * int) * (int * int) -> t -> color
+
+(** [direction x1 y1 x2 y2] is the direction of a move from x1 y1 to x2 y2*)
+val direction : int -> int -> int -> int -> direc 
 
 (** [branch_filled points board] have to write the spec. *)
 val branch_filled : (int * int) * (int * int) -> t -> bool
