@@ -3,10 +3,10 @@
     exaustive of the cases a user could encounter while not being
     repetitive. To do this, we complied our test suite by looking at
     each .ml file and deciding which functions contained significant
-    variables that could lead to sources of error. We also preformed a
+    variables that could lead to sources of error. We also performed a
     lot of front-end user testing by running the application in the GUI
     and playing the game. This allowed us to visibly see what errors a
-    player would encounter and work bacckwards to solve those errors in
+    player would encounter and work backwards to solve those errors in
     our code.
 
     Our OUnit tests were done using a combination of glass and black box
@@ -14,11 +14,23 @@
     the board size, level difficulty, colors, and user commands we could
     test each of these individually. Glass-box testing was used on the
     side matrix to check each side of the possible squares the user
-    could create. Randomized testing was used to test the AI. Black box
-    ensured that the game ended.
+    could create. Glass-box testing was also used on the Command module,
+    since we tried every possible way of making a move. Randomized
+    testing was used to test the AI. Black box ensured that the game
+    ended.
 
-    By combining manual and OUnit testing we are able to confirm the
-    overall correctness of our system. *)
+    Modules tested in OUnit: Mainly command and board.
+
+    Modules tested manually: Since we wrote code to have two bots play
+    against each other, every module was "tested" manually- in the sense
+    that the bots always play a complete and correct game. Since their
+    moves are random, repeated simulations prove the correctness of our
+    system.
+
+    By combining random testing through AI simulation games and OUnit
+    testing we are able to confirm the overall correctness of our
+    system. The game has sucessfully kept track of moves, if the game
+    has ended, and boxes through hundreds of AI simulations.*)
 
 open OUnit2
 open Board
