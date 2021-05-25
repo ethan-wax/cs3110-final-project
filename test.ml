@@ -470,7 +470,7 @@ let is_not_third_move_box row col board move =
   let empty_sides_list = empty_sides row col board in
   if
     List.nth empty_sides_list 0 <> move
-    || List.nth empty_sides_list 1 <> move
+    && List.nth empty_sides_list 1 <> move
   then true
   else false
 
