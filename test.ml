@@ -466,6 +466,30 @@ let board_complete_one_box_5x5 =
        Blue
        (update_board ((1, 2), (2, 2)) Red (make_board (5, 5))))
 
+let is_not_third_move_box row col board move =
+  let empty_sides_list = empty_sides row col board in
+  if
+    List.nth empty_sides_list 0 <> move
+    || List.nth empty_sides_list 1 <> move
+  then true
+  else false
+
+let hard_bot_not_complete_box_test
+    (name : string)
+    (row : int)
+    (col : int)
+    (board : Board.t)
+    (expected_output : bool) : test =
+  name >:: fun _ ->
+  assert_equal expected_output
+    (is_not_third_move_box row col board (Ai.hard board))
+
+let board_box_half_filled_5x5 =
+  update_board
+    ((2, 2), (2, 3))
+    Blue
+    (update_board ((1, 2), (2, 2)) Red (make_board (5, 5)))
+
 let ai_tests =
   [
     medium_bot_test "blank board, move should be on the edge"
@@ -476,6 +500,8 @@ let ai_tests =
       "board with one box to be completed- should priortize the box \
        and fill it in"
       board_complete_one_box_5x5 "1 3 2 3";
+    hard_bot_not_complete_box_test "box with 2 moves available" 2 3
+      board_box_half_filled_5x5 true;
   ]
 
 let suite =
