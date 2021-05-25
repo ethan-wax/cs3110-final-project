@@ -1,24 +1,21 @@
-(** Test Plan:
+(** Test Plan: For testing, we wanted to test as many possible game
+    combinations and conditions. Our goal was to have our test suite be
+    exaustive of the cases a user could encounter while not being
+    repetitive. To do this, we complied our test suite by looking at
+    each .ml file and deciding which functions contained significant
+    variables that could lead to sources of error. We also preformed a
+    lot of front-end user testing by running the application in the GUI
+    and playing the game. This allowed us to visibly see what errors a
+    player would encounter and work bacckwards to solve those errors in
+    our code.
 
-    - what was automatically tested by OUnit??
-
-    For testing, we wanted to test as many possible game combinaations
-    and conditions. Our goal was to have our test suite be exaustive of
-    the cases a user could encounter while not being repetitive. To do
-    this, we complied our test suite by looking at each .ml file and
-    deciding which functions contained significant variables that could
-    lead to sources of error. We also preformed a lot of front-end user
-    testing by running the application in the GUI and playing the game.
-    This allowed us to visibly see what errors a player would encounter
-    and work bacckwards to solve those errors in our code.
-
-    The majority of our OUnit tests were done using glass box testing.
-    By breaking our game down into its individual features like the
-    board size, level difficulty, colors, and user commands we could
+    Our OUnit tests were done using a combination of glass and black box
+    testing. By breaking our game down into its individual features like
+    the board size, level difficulty, colors, and user commands we could
     test each of these individually. Glass-box testing was used on the
-    side matrix because we needed to test
-
-    black box - game ended glass box - everything else randomized - AI
+    side matrix to check each side of the possible squares the user
+    could create. Randomized testing was used to test the AI. Black box
+    ensured that the game ended.
 
     By combining manual and OUnit testing we are able to confirm the
     overall correctness of our system. *)
@@ -88,6 +85,18 @@ let board_with_box =
           Blue
           (update_board ((0, 0), (1, 0)) Red (make_board (1, 1)))))
 
+let board_with_box_player1 =
+  update_board
+    ((0, 1), (0, 0))
+    Red
+    (update_board
+      ((1, 1), (0, 1))
+      Blue
+      (update_board
+          ((1, 0), (1, 1))
+          Red
+          (update_board ((0, 0), (1, 0)) Blue (make_board (1, 1)))))
+
 let big_board_with_two_boxes =
   update_board
     ((3, 3), (3, 4))
@@ -114,6 +123,29 @@ let big_board_with_two_boxes =
                          ((0, 0), (1, 0))
                          Red
                          (make_board (5, 5)))))))))
+let one_box_per_player =
+  update_board
+    ((2, 1), (2, 0))
+    Red
+    (update_board
+        ((2, 1), (1, 1))
+        Blue
+        (update_board
+          ((2, 0), (1, 0))
+          Red
+          (update_board
+              ((1, 1), (1, 0))
+              Blue
+              (update_board
+                ((1, 1), (0, 1))
+                Red
+                (update_board
+                    ((0, 0), (1, 0))
+                    Blue
+                    (update_board
+                      ((0, 0), (0, 1))
+                      Red 
+                      make_board (3,3)
 
 let bug_target = update_board ((3, 3), (3, 4)) Red (make_board (5, 5))
 
@@ -307,6 +339,10 @@ let score_tests =
     score_test "board with box has score (0,1)" board_with_box (0, 1);
     score_test "board with two boxes has score (0,2)"
       big_board_with_two_boxes (0, 2);
+    score_test "board with one box for each player has score (1,1)" 
+      one_box_per_player (1,1);
+    score_test "board with box Player1 has score (1,0)" 
+      board_with_box_player1 (1,0);
   ]
 
 let end_game_tests =
@@ -315,6 +351,8 @@ let end_game_tests =
       false;
     end_game_test "board with box has reached end game" board_with_box
       true;
+    end_game_test "board with 2 boxes has reached end game" 
+      big_board_with_two_boxes true;
   ]
 
 let side_matrix_tests =
@@ -339,6 +377,18 @@ let side_matrix_tests =
     sides_matrix_test
       "board_with_two_boxes should have value of 4 at box (3,3)"
       big_board_with_two_boxes 3 3 4;
+    sides_matrix_test
+      "board_with_two_boxes should have value of 3 at box (3,4)"
+      big_board_with_two_boxes 3 4 3;
+    sides_matrix_test
+      "board_with_two_boxes should have value of 3 at box (4,3)"
+      big_board_with_two_boxes 4 3 3;
+    sides_matrix_test
+      "board_with_two_boxes should have value of 2 at box (2,3)"
+      big_board_with_two_boxes 2 3 2;
+    sides_matrix_test
+      "board_with_two_boxes should have value of 2 at box (3,3)"
+      big_board_with_two_boxes 3 3 2;
   ]
 
 let command_tests =
