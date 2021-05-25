@@ -1,6 +1,8 @@
 (** Easy, Medium, and Hard AI *)
 open Board
 
+val empty_sides : Board.t -> string list
+
 (** Takes in a board and returns a move. Easy AI randomly picks
     available moves and returns the move in the format "r1 c2 r2 c2". *)
 val easy : Board.t -> string
